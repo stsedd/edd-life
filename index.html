@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2f241d" />
+  <title>Edd Life</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar panel-dark">
+      <div>
+        <div class="brand">
+          <div class="brand-rune">✦</div>
+          <div>
+            <h1>EDD</h1>
+            <p>same person.<br>higher standards.</p>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Navegação principal">
+          <button class="nav-item active">Hoje</button>
+          <button class="nav-item">Tarefas</button>
+          <button class="nav-item">Inbox <span class="pill-count">3</span></button>
+          <button class="nav-item">Quests</button>
+          <button class="nav-item">Ficha</button>
+          <button class="nav-item">Loja</button>
+          <button class="nav-item">Crônica</button>
+        </nav>
+
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projetos</div>
+          <div class="project-stack">
+            <button>Monking</button>
+            <button>Monking Play</button>
+            <button>Freela — Manu</button>
+            <button>Duodécima</button>
+            <button>Pessoal</button>
+          </div>
+        </section>
+      </div>
+
+      <footer class="sidebar-footer">v0.1 · protótipo funcional</footer>
+    </aside>
+
+    <main class="workspace">
+      <header class="hero card">
+        <div>
+          <p class="eyebrow">segunda-feira, 22 de setembro</p>
+          <h2>Bom dia, Edd.</h2>
+          <p class="muted">Pequenos passos também constroem grandes jornadas.</p>
+        </div>
+        <button class="primary-action" id="quickAdd">＋ adicionar tarefa</button>
+      </header>
+
+      <section class="stats-grid" aria-label="Resumo do dia">
+        <article class="card stat-card">
+          <span class="label">Nível</span>
+          <div class="stat-line"><strong>12</strong><span>2.340 / 4.000 XP</span></div>
+          <div class="progress"><span style="width:58%"></span></div>
+        </article>
+
+        <article class="card stat-card">
+          <span class="label">Moedas</span>
+          <div class="stat-line"><strong>340</strong><span>+42 esta semana</span></div>
+        </article>
+
+        <article class="card stat-card">
+          <span class="label">Humor</span>
+          <div class="stat-line"><strong class="word-stat">Tranquilo</strong><span>check-in da manhã</span></div>
+        </article>
+
+        <article class="card stat-card">
+          <span class="label">Energia</span>
+          <div class="mini-energy" aria-label="Energia 3 de 5"><i></i><i></i><i></i><i class="off"></i><i class="off"></i></div>
+          <span class="small-note">energia 3 = +10% XP</span>
+        </article>
+      </section>
+
+      <section class="main-grid">
+        <section class="card task-card">
+          <div class="card-head">
+            <div>
+              <h3>Tarefas</h3>
+              <p class="muted">O centro do site: o que precisa acontecer agora.</p>
+            </div>
+            <div class="tabs" role="tablist">
+              <button class="tab active">Hoje</button>
+              <button class="tab">Amanhã</button>
+              <button class="tab">Semana</button>
+              <button class="tab">Depois</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="task-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Tarefa</th>
+                  <th>Projeto</th>
+                  <th>Área</th>
+                  <th>Dificuldade</th>
+                  <th>Recompensa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input class="task-check" type="checkbox"></td>
+                  <td>Revisar carrossel</td>
+                  <td><span class="tag">Monking Play</span></td>
+                  <td>Trabalho</td>
+                  <td><span class="difficulty medium">Média</span></td>
+                  <td>250 XP · 12 🪙</td>
+                </tr>
+                <tr>
+                  <td><input class="task-check" type="checkbox"></td>
+                  <td>Post da Ana (entregar p/ Manu)</td>
+                  <td><span class="tag accent">Freela — Manu</span></td>
+                  <td>Trabalho</td>
+                  <td><span class="difficulty medium">Média</span></td>
+                  <td>250 XP · 12 🪙</td>
+                </tr>
+                <tr>
+                  <td><input class="task-check" type="checkbox"></td>
+                  <td>Responder e-mails</td>
+                  <td><span class="tag">Monking</span></td>
+                  <td>Trabalho</td>
+                  <td><span class="difficulty simple">Simples</span></td>
+                  <td>100 XP · 5 🪙</td>
+                </tr>
+                <tr>
+                  <td><input class="task-check" type="checkbox"></td>
+                  <td>Comprar detergente</td>
+                  <td><span class="tag muted-tag">Pessoal</span></td>
+                  <td>Casa</td>
+                  <td><span class="difficulty simple">Simples</span></td>
+                  <td>100 XP · 5 🪙</td>
+                </tr>
+                <tr class="done">
+                  <td><input class="task-check" type="checkbox" checked></td>
+                  <td>Treino (esteira 30 min)</td>
+                  <td><span class="tag muted-tag">Pessoal</span></td>
+                  <td>Movimento</td>
+                  <td><span class="difficulty medium">Média</span></td>
+                  <td>250 XP · 12 🪙</td>
+                </tr>
+                <tr>
+                  <td><input class="task-check" type="checkbox"></td>
+                  <td>Ler 20 páginas</td>
+                  <td><span class="tag muted-tag">Pessoal</span></td>
+                  <td>Crescimento</td>
+                  <td><span class="difficulty simple">Simples</span></td>
+                  <td>100 XP · 5 🪙</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside class="right-stack">
+          <section class="card character-card">
+            <div class="pixel-placeholder" aria-label="Placeholder para portrait em pixel art">
+              <div class="pixel-head"></div>
+              <div class="pixel-hair"></div>
+              <div class="pixel-neck"></div>
+              <div class="pixel-coat"></div>
+              <span>portrait em pixel art<br>entra aqui</span>
+            </div>
+            <div class="character-copy">
+              <p class="eyebrow">EDD</p>
+              <h3>Human being in progress.</h3>
+              <p class="muted">O personagem final substituirá este placeholder. Nenhuma foto pessoal será publicada.</p>
+              <button class="secondary-action">Ver ficha</button>
+            </div>
+          </section>
+
+          <section class="card quest-card">
+            <div class="card-head compact-head">
+              <h3>Quest da semana</h3>
+              <span class="small-note">2 dias restantes</span>
+            </div>
+            <div class="quest-row">
+              <div class="quest-icon">📚</div>
+              <div>
+                <h4>Scholar’s Trial</h4>
+                <p>Leia 5 capítulos de qualquer livro.</p>
+                <div class="progress small"><span style="width:40%"></span></div>
+                <p class="small-note">2 / 5 · +1.100 XP · +60 🪙</p>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="bottom-grid">
+        <section class="card checkin-card">
+          <div class="card-head compact-head"><h3>Check-in de hoje</h3></div>
+          <p class="form-label">Humor</p>
+          <div class="mood-row">
+            <button class="mood">😊</button>
+            <button class="mood selected">😌</button>
+            <button class="mood">😐</button>
+            <button class="mood">😣</button>
+            <button class="mood">😡</button>
+          </div>
+
+          <p class="form-label">Energia</p>
+          <div class="energy-selector" id="energySelector">
+            <button data-level="1"></button>
+            <button data-level="2"></button>
+            <button data-level="3" class="selected"></button>
+            <button data-level="4"></button>
+            <button data-level="5"></button>
+          </div>
+          <p class="small-note" id="energyBonus">Energia 3 · bônus atual: +10% XP</p>
+          <textarea placeholder="Alguma nota para hoje?"></textarea>
+        </section>
+
+        <section class="card goal-card">
+          <div class="card-head compact-head"><h3>Meta em destaque</h3></div>
+          <div class="goal-row">
+            <div>
+              <h4>Pacote de RPG</h4>
+              <p>3.240 / 6.000 moedas</p>
+              <div class="progress"><span style="width:54%"></span></div>
+              <p class="muted">Faltam 2.760 moedas para resgatar.</p>
+            </div>
+            <div class="goal-icon">🎁</div>
+          </div>
+          <button class="secondary-action full">Ver loja</button>
+        </section>
+
+        <section class="card achievements-card">
+          <div class="card-head compact-head"><h3>Conquistas recentes</h3></div>
+          <ul>
+            <li><strong>Consistência I</strong><span>7 dias usando o site.</span></li>
+            <li><strong>Leitor em Ação</strong><span>5 sessões de leitura concluídas.</span></li>
+            <li><strong>Organização Mínima</strong><span>10 tarefas concluídas.</span></li>
+          </ul>
+        </section>
+
+        <section class="card wheel-card">
+          <div class="card-head compact-head"><h3>Roda da Vida</h3><span class="small-note">últimos 7 dias</span></div>
+          <div class="wheel-layout">
+            <svg class="wheel" viewBox="0 0 320 320" role="img" aria-label="Roda da vida do Edd">
+              <g class="wheel-grid">
+                <polygon points="160,40 244.9,75.1 280,160 244.9,244.9 160,280 75.1,244.9 40,160 75.1,75.1"/>
+                <polygon points="160,64 227.9,92.1 256,160 227.9,227.9 160,256 92.1,227.9 64,160 92.1,92.1"/>
+                <polygon points="160,88 210.9,109.1 232,160 210.9,210.9 160,232 109.1,210.9 88,160 109.1,109.1"/>
+                <polygon points="160,112 193.9,126.1 208,160 193.9,193.9 160,208 126.1,193.9 112,160 126.1,126.1"/>
+                <polygon points="160,136 176.9,143.1 184,160 176.9,176.9 160,184 143.1,176.9 136,160 143.1,143.1"/>
+                <line x1="160" y1="160" x2="160" y2="40"/>
+                <line x1="160" y1="160" x2="244.9" y2="75.1"/>
+                <line x1="160" y1="160" x2="280" y2="160"/>
+                <line x1="160" y1="160" x2="244.9" y2="244.9"/>
+                <line x1="160" y1="160" x2="160" y2="280"/>
+                <line x1="160" y1="160" x2="75.1" y2="244.9"/>
+                <line x1="160" y1="160" x2="40" y2="160"/>
+                <line x1="160" y1="160" x2="75.1" y2="75.1"/>
+              </g>
+              <polygon class="wheel-target" points="160,64 216.6,103.4 256,160 216.6,216.6 160,256 103.4,216.6 64,160 103.4,103.4"></polygon>
+              <polygon class="wheel-current" points="160,82 198.9,121.1 238,160 195.4,195.4 160,220 117.6,202.4 82,160 109.1,109.1"></polygon>
+              <g class="wheel-labels">
+                <text x="160" y="24">Trabalho</text>
+                <text x="254" y="68">Casa</text>
+                <text x="291" y="165">Saúde</text>
+                <text x="252" y="261">Movimento</text>
+                <text x="160" y="305">Autocuidado</text>
+                <text x="55" y="261">Social</text>
+                <text x="22" y="165">Crescimento</text>
+                <text x="55" y="68">Finanças</text>
+              </g>
+            </svg>
+            <div class="wheel-note">
+              <p>Nesta semana, Trabalho e Crescimento receberam mais atenção. Movimento e Social ficaram mais quietos.</p>
+              <button class="secondary-action full">Ver análise completa</button>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" hidden>Protótipo: criação de tarefas entra na próxima etapa.</div>
+  <script src="app.js"></script>
+</body>
+</html>
