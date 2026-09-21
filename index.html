@@ -7,8 +7,9 @@
   <title>Edd's Life</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="v21.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -108,7 +109,10 @@
               </div>
               <div class="avatar-stage">
                 <div class="avatar-glow"></div>
-                <img id="homeAvatar" class="avatar-image" alt="Edd em pixel art" />
+                <div class="avatar-sprite" id="homeAvatarWrap">
+                  <img id="homeAvatar" class="avatar-image" alt="Edd em pixel art" />
+                  <span class="outfit-tint" aria-hidden="true"></span>
+                </div>
               </div>
               <div class="avatar-footer">
                 <strong>Arquiteto da rotina</strong>
@@ -172,7 +176,10 @@
           <section class="rpg-panel character-main">
             <div class="character-portrait">
               <div class="avatar-glow large"></div>
-              <img id="sheetAvatar" class="avatar-image large" alt="Edd em pixel art" />
+              <div class="avatar-sprite large" id="sheetAvatarWrap">
+                <img id="sheetAvatar" class="avatar-image large" alt="Edd em pixel art" />
+                <span class="outfit-tint" aria-hidden="true"></span>
+              </div>
             </div>
             <div class="character-info">
               <p class="eyebrow">FICHA DE PERSONAGEM</p>
@@ -182,6 +189,18 @@
               <div class="sheet-stats" id="sheetStats"></div>
               <div class="profile-badge" id="profileBadge"></div>
             </div>
+          </section>
+
+          <section class="rpg-panel wardrobe-panel">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">GUARDA-ROUPA</p>
+                <h3>Inventário cosmético</h3>
+                <p class="muted">Os primeiros looks já podem ser equipados. No futuro, novos visuais podem vir de níveis, conquistas, quests e loja.</p>
+              </div>
+              <span class="week-label" id="equippedLookLabel"></span>
+            </div>
+            <div class="wardrobe-grid" id="wardrobeGrid"></div>
           </section>
         </section>
       </section>
@@ -263,6 +282,7 @@
   <script src="render-tasks.js"></script>
   <script src="render-extra.js"></script>
   <script src="actions.js"></script>
+  <script src="cosmetics.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
