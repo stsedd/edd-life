@@ -79,4 +79,77 @@ function renderQuestMini() {
     </div>`;
 }
 
-document.write('<script src="wardrobe-fix.js?v=3"><\/script>');
+(function installCampaignJournalDirection(){
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'campaign.css?v=1';
+  document.head.appendChild(link);
+
+  greeting = () => "Edd's Life";
+  viewCopy.today = ['CAMPANHA', "Edd's Life", 'Sua vida em quests, progresso e escolhas — sem depender de horário.'];
+  viewCopy.character = ['FICHA', 'Ficha de Campanha', 'Nível, progresso, moedas e uma insígnia em destaque.'];
+
+  const hero = document.querySelector('.hero');
+  if (hero && !hero.querySelector('.banner-mark')) {
+    hero.classList.add('campaign-banner');
+    hero.firstElementChild?.classList.add('banner-copy');
+    hero.insertAdjacentHTML('afterbegin', '<div class="banner-mark" aria-hidden="true"><span>E</span></div>');
+  }
+
+  const avatarCard = document.querySelector('.avatar-card');
+  if (avatarCard) {
+    avatarCard.className = 'rpg-panel campaign-summary-card';
+    avatarCard.innerHTML = `
+      <div class="campaign-summary-head">
+        <div><p class="eyebrow">FICHA DA CAMPANHA</p><h3>Arquiteto da Rotina</h3></div>
+        <button class="chip" data-go-view="character">ficha</button>
+      </div>
+      <div class="campaign-summary-identity">
+        <div class="campaign-mini-sigil" aria-hidden="true">✦</div>
+        <div><strong>Edd</strong><p class="muted">O personagem é o seu progresso real.</p></div>
+      </div>
+      <div class="campaign-metrics">
+        <div class="campaign-metric"><span>nível</span><strong id="campaignLevel">1</strong></div>
+        <div class="campaign-metric"><span>XP</span><strong id="campaignXp">0</strong></div>
+        <div class="campaign-metric"><span>moedas</span><strong id="campaignCoins">0</strong></div>
+      </div>
+      <div class="campaign-active-quest"><span>quest ativa</span><strong id="campaignQuest">nenhuma selecionada</strong></div>`;
+  }
+
+  const characterMain = document.querySelector('.character-main');
+  if (characterMain) {
+    characterMain.classList.add('campaign-sheet');
+    characterMain.innerHTML = `
+      <div class="campaign-sigil-stage">
+        <div class="campaign-sigil" aria-hidden="true">✦</div>
+        <div class="campaign-sigil-label"><strong>Edd's Life</strong><span>campanha pessoal</span></div>
+      </div>
+      <div class="character-info">
+        <p class="eyebrow">FICHA DE CAMPANHA</p>
+        <h3>Edd</h3>
+        <p class="title-line">Arquiteto da Rotina</p>
+        <p class="muted">Seu progresso é representado por nível, XP, moedas, quests e insígnias — sem precisar de avatar.</p>
+        <div class="sheet-stats" id="sheetStats"></div>
+        <div class="profile-badge" id="profileBadge"></div>
+      </div>`;
+  }
+
+  document.querySelector('.wardrobe-panel')?.remove();
+
+  const baseRenderCharacter = renderCharacter;
+  renderCharacter = function(){
+    baseRenderCharacter();
+    const xp = totalXp();
+    const level = computeLevel(xp);
+    const selected = state.questOffers.find(o => o.selected);
+    const q = selected && questTemplate(selected.quest_template_id);
+    const levelEl = $('#campaignLevel');
+    const xpEl = $('#campaignXp');
+    const coinEl = $('#campaignCoins');
+    const questEl = $('#campaignQuest');
+    if (levelEl) levelEl.textContent = level.level;
+    if (xpEl) xpEl.textContent = xp.toLocaleString('pt-BR');
+    if (coinEl) coinEl.textContent = coinBalance().toLocaleString('pt-BR');
+    if (questEl) questEl.textContent = q?.title || 'nenhuma selecionada';
+  };
+})();
