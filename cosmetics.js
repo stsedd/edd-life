@@ -1,70 +1,58 @@
-const AVATAR_ASSET_PATH = 'assets/edd.webp';
-
 const COSMETIC_CATALOG = [
-  { code:'explorer', name:'Explorador de Café', tint:'transparent', opacity:0, unlock:'starter', detail:'Look base · jaqueta marrom e bolsa lateral.' },
-  { code:'noir', name:'Noir Urbano', tint:'#20242b', opacity:.64, unlock:'starter', detail:'Versão escura para dias mais minimalistas.' },
-  { code:'crimson', name:'Carmesim', tint:'#7d2940', opacity:.64, unlock:'starter', detail:'Casaco em vermelho profundo, inspirado no seu look de alfaiataria.' },
-  { code:'moss', name:'Caminhante de Musgo', tint:'#56694c', opacity:.60, unlock:'level', level:5, detail:'Desbloqueia no nível 5.' }
+  { code:'explorer', name:'Explorador de Café', asset:'assets/look-explorer.svg', unlock:'starter', detail:'Look base · jaqueta marrom, bolsa lateral e vibe de campanha.' },
+  { code:'noir', name:'Noir Urbano', asset:'assets/look-noir.svg', unlock:'starter', detail:'Versão mais escura, com silhueta limpa para dias minimalistas.' },
+  { code:'crimson', name:'Carmesim', asset:'assets/look-crimson.svg', unlock:'starter', detail:'Blazer em vermelho profundo, inspirado no seu look de alfaiataria.' },
+  { code:'moss', name:'Caminhante de Musgo', asset:'assets/look-moss.svg', unlock:'level', level:5, detail:'Manto verde e pin botânico. Desbloqueia no nível 5.' }
 ];
 
 function currentLookCode() {
   return state.user?.user_metadata?.equipped_look || 'explorer';
+}
+function currentLookItem(code=currentLookCode()) {
+  return COSMETIC_CATALOG.find(x=>x.code===code) || COSMETIC_CATALOG[0];
 }
 function cosmeticUnlocked(item) {
   if (item.unlock === 'starter') return true;
   if (item.unlock === 'level') return computeLevel(totalXp()).level >= item.level;
   return false;
 }
-function applyLookToSprite(wrap, code) {
+function setSpriteAsset(wrap, assetPath){
   if (!wrap) return;
-  const item = COSMETIC_CATALOG.find(x=>x.code===code) || COSMETIC_CATALOG[0];
-  wrap.dataset.look = item.code;
-  wrap.style.setProperty('--look-color', item.tint);
-  wrap.style.setProperty('--look-opacity', String(item.opacity));
   const img = wrap.querySelector('img');
-  const tint = wrap.querySelector('.outfit-tint');
   if (img) {
-    img.src = AVATAR_ASSET_PATH;
-    img.onerror = () => {
-      img.removeAttribute('src');
-      wrap.classList.add('asset-fallback');
-    };
-  }
-  if (tint) {
-    tint.style.webkitMaskImage = `url("${AVATAR_ASSET_PATH}")`;
-    tint.style.maskImage = `url("${AVATAR_ASSET_PATH}")`;
+    img.src = assetPath;
+    img.loading = 'eager';
+    img.decoding = 'async';
   }
 }
 function setAvatarSources() {
-  const code = currentLookCode();
-  applyLookToSprite($('#homeAvatarWrap'), code);
-  applyLookToSprite($('#sheetAvatarWrap'), code);
+  const item = currentLookItem();
+  setSpriteAsset($('#homeAvatarWrap'), item.asset);
+  setSpriteAsset($('#sheetAvatarWrap'), item.asset);
 }
 function cosmeticPreviewMarkup(item, current) {
   const unlocked = cosmeticUnlocked(item);
   const equipped = current === item.code;
   return `<article class="cosmetic-card ${equipped?'equipped':''} ${unlocked?'':'locked'}">
     <div class="cosmetic-preview">
-      <div class="avatar-sprite wardrobe-preview" data-preview-look="${item.code}">
-        <img class="avatar-image" src="${AVATAR_ASSET_PATH}" alt="Preview do look ${escapeHtml(item.name)}">
-        <span class="outfit-tint" aria-hidden="true"></span>
-      </div>
+      <img class="wardrobe-thumb" src="${item.asset}" alt="Preview do look ${escapeHtml(item.name)}" loading="lazy">
       <span class="cosmetic-rarity">${equipped?'equipado':unlocked?'disponível':`nível ${item.level}`}</span>
     </div>
     <div class="cosmetic-copy">
-      <h4>${escapeHtml(item.name)}</h4>
-      <p>${escapeHtml(item.detail)}</p>
+      <div>
+        <h4>${escapeHtml(item.name)}</h4>
+        <p>${escapeHtml(item.detail)}</p>
+      </div>
+      <button class="btn ${equipped?'secondary':'primary'} small" data-equip-look="${item.code}" ${!unlocked?'disabled':''}>${equipped?'equipado':unlocked?'equipar':'bloqueado'}</button>
     </div>
-    <button class="btn ${equipped?'secondary':'primary'} small" data-equip-look="${item.code}" ${!unlocked?'disabled':''}>${equipped?'equipado':unlocked?'equipar':'bloqueado'}</button>
   </article>`;
 }
 function renderWardrobe() {
   const grid = $('#wardrobeGrid'); if (!grid) return;
   const current = currentLookCode();
-  const currentItem = COSMETIC_CATALOG.find(x=>x.code===current) || COSMETIC_CATALOG[0];
+  const currentItem = currentLookItem(current);
   $('#equippedLookLabel').textContent = `equipado: ${currentItem.name}`;
   grid.innerHTML = COSMETIC_CATALOG.map(item=>cosmeticPreviewMarkup(item,current)).join('');
-  $$('.wardrobe-preview', grid).forEach(wrap=>applyLookToSprite(wrap, wrap.dataset.previewLook));
 }
 async function equipCosmetic(code) {
   const item = COSMETIC_CATALOG.find(x=>x.code===code); if (!item) return;
