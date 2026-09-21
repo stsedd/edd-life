@@ -1,154 +1,45 @@
-const COSMETIC_CATALOG = [
-  {
-    code:'explorer',
-    name:'Explorador de Café',
-    asset:'assets/avatar-explorer.svg',
-    unlock:'starter',
-    detail:'Look base no espírito do Habitica: jaqueta marrom, bolsa lateral e ar de aventureiro urbano.'
-  },
-  {
-    code:'noir',
-    name:'Noir Urbano',
-    asset:'assets/avatar-noir.svg',
-    unlock:'starter',
-    detail:'Versão escura e minimalista, com silhueta mais elegante para dias focados.'
-  },
-  {
-    code:'crimson',
-    name:'Carmesim',
-    asset:'assets/avatar-crimson.svg',
-    unlock:'starter',
-    detail:'Inspirado no seu look vermelho de alfaiataria: mais presença, mais drama, mais main character.'
-  },
-  {
-    code:'moss',
-    name:'Caminhante de Musgo',
-    asset:'assets/avatar-moss.svg',
-    unlock:'level',
-    level:5,
-    detail:'Visual de trilha e fantasia cozy. Desbloqueia no nível 5.'
-  }
-];
+const DEFAULT_LOADOUT={shirt:'none',pants:'none',outerwear:'none',hat:'none',accessory:'none'};
+let wardrobeCategory='shirt';
+const CATEGORY_LABELS={shirt:'Camisas',pants:'Calças',outerwear:'Casacos & capas',hat:'Chapéus',accessory:'Acessórios'};
+const AVATAR_CATALOG={
+  shirt:[{code:'none',name:'Sem camisa extra'},{code:'tee_black',name:'Camiseta preta',index:0},{code:'shirt_white',name:'Camisa branca',index:1},{code:'hoodie_black',name:'Hoodie preto',index:2},{code:'overshirt_green',name:'Overshirt verde',index:3}],
+  pants:[{code:'none',name:'Short base'},{code:'pants_black',name:'Calça escura',index:0},{code:'cargo_brown',name:'Cargo marrom',index:1},{code:'pants_crimson',name:'Calça carmesim',index:2},{code:'joggers_black',name:'Jogger preto',index:3}],
+  outerwear:[{code:'none',name:'Sem casaco'},{code:'blazer_crimson',name:'Blazer carmesim',index:0},{code:'coat_noir',name:'Casaco noir',index:1},{code:'cape_green',name:'Capa verde',index:2},{code:'robe_scholar',name:'Capa scholar',index:3}],
+  hat:[{code:'none',name:'Sem chapéu'},{code:'hat_explorer',name:'Chapéu explorer',index:0},{code:'cap_black',name:'Boné preto',index:1},{code:'beret_brown',name:'Boina marrom',index:2},{code:'wizard_hat',name:'Chapéu de mago',index:3}],
+  accessory:[{code:'none',name:'Sem acessório'},{code:'glasses_round',name:'Óculos redondos',index:0},{code:'bag_crossbody',name:'Bolsa lateral',index:1},{code:'scarf_red',name:'Lenço vermelho',index:2},{code:'tool_belt',name:'Cinto de ferramentas',index:3}]
+};
+const AVATAR_FILES={base:'assets/avatar-base.b64',shirt:'assets/avatar-shirt.b64',pants:'assets/avatar-pants.b64',outerwear:'assets/avatar-outerwear.b64',hat:'assets/avatar-hat.b64',accessory:'assets/avatar-accessory.b64'};
+let avatarAssets=null,avatarAssetsPromise=null;
 
-(function injectWardrobeQuestPolish(){
-  if(document.getElementById('edd-v24-polish')) return;
-  const style=document.createElement('style');
-  style.id='edd-v24-polish';
-  style.textContent=`
-    .outfit-tint{display:none!important}
-    .avatar-image{image-rendering:auto;filter:drop-shadow(0 12px 18px rgba(55,35,20,.14))}
-    .wardrobe-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
-    .cosmetic-card{padding:10px!important;border-radius:14px!important;gap:9px!important;grid-template-columns:1fr!important;grid-template-rows:auto minmax(72px,auto) auto!important;background:rgba(255,255,255,.42)!important}
-    .cosmetic-preview{position:relative!important;min-height:192px!important;height:192px!important;border-radius:12px!important;overflow:hidden!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;padding:6px 8px 0!important;background:radial-gradient(circle at 50% 28%,rgba(255,247,235,.92),rgba(232,220,201,.72) 48%,rgba(206,188,162,.45) 100%)!important;border:1px solid rgba(120,90,55,.16)!important}
-    .wardrobe-preview{width:min(146px,82%)!important;height:100%!important;display:flex!important;align-items:flex-end!important;justify-content:center!important}
-    .wardrobe-preview .avatar-image{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important}
-    .cosmetic-rarity{font-size:9px!important;left:8px!important;top:8px!important;padding:4px 7px!important}
-    .cosmetic-copy h4{font-size:15px!important;line-height:1.15!important;margin-bottom:3px!important}
-    .cosmetic-copy p{font-size:11px!important;line-height:1.35!important;display:-webkit-box!important;-webkit-line-clamp:3!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
-    .cosmetic-card .btn{width:100%!important}
-    .cosmetic-card.equipped{box-shadow:0 0 0 2px rgba(144,106,64,.18) inset!important}
-
-    .quest-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important;align-items:start!important}
-    .quest-card.tarot{min-height:0!important;height:auto!important;border-radius:13px!important}
-    .tarot-frame{min-height:0!important;height:auto!important;padding:9px 9px 10px!important;margin:6px!important;gap:7px!important;display:grid!important;align-content:start!important;grid-template-rows:auto 138px auto auto auto auto!important}
-    .tarot-frame::before{top:18px!important}
-    .tarot-kicker{font-size:9px!important;padding:0 4px!important;min-height:18px!important;margin-bottom:0!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
-    .tarot-art{height:138px!important;min-height:138px!important;border-radius:6px!important;display:grid!important;place-items:center!important;padding:8px 12px!important;overflow:hidden!important;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.015))!important;border:1px solid rgba(212,169,87,.24)!important}
-    .tarot-art img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;image-rendering:auto!important;transform:none!important}
-    .tarot-title{gap:7px!important;align-items:center!important}
-    .tarot-title h4{font-size:18px!important;line-height:1.05!important}
-    .tarot-description{font-size:11.5px!important;line-height:1.35!important;min-height:0!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
-    .tarot-progress{height:7px!important;margin-top:0!important}
-    .tarot-meta{font-size:10px!important;gap:8px!important;justify-content:center!important}
-    .tarot .quest-actions{display:grid!important;grid-template-columns:1.35fr .85fr!important;gap:7px!important}
-    .tarot .quest-actions .btn{width:100%!important;min-height:34px!important;font-size:11px!important;padding:6px 8px!important}
-    @media(max-width:1180px){.quest-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.wardrobe-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-    @media(max-width:680px){.quest-grid,.wardrobe-grid{grid-template-columns:1fr!important}.tarot-frame{grid-template-rows:auto 130px auto auto auto auto!important}.tarot-art{height:130px!important;min-height:130px!important}.cosmetic-preview{height:200px!important}}
-  `;
-  document.head.appendChild(style);
+(function injectModularAvatarStyles(){
+ if(document.getElementById('edd-modular-avatar-styles'))return;
+ const style=document.createElement('style');style.id='edd-modular-avatar-styles';style.textContent=`
+ .outfit-tint{display:none!important}.avatar-sprite.modular-avatar{position:relative!important;aspect-ratio:160/249!important;display:block!important;height:auto!important;overflow:visible!important}.avatar-layer{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;pointer-events:none!important;image-rendering:pixelated!important}.avatar-base-layer{object-fit:contain!important;object-position:center bottom!important;z-index:1}.avatar-sprite-layer{background-repeat:no-repeat!important;background-size:200% 200%!important}.layer-pants{z-index:2}.layer-shirt{z-index:3}.layer-outerwear{z-index:4}.layer-hat{z-index:6}.layer-accessory{z-index:7}
+ .wardrobe-grid{display:block!important}.wardrobe-builder{display:grid;grid-template-columns:minmax(260px,.78fr) minmax(0,1.5fr);gap:18px;align-items:stretch}.wardrobe-live{border:1px solid rgba(91,59,40,.14);border-radius:16px;background:radial-gradient(circle at 50% 22%,rgba(255,248,236,.95),rgba(229,214,194,.72) 52%,rgba(199,178,151,.34));padding:14px;display:flex;flex-direction:column;min-height:520px}.wardrobe-live-head{display:flex;justify-content:space-between;gap:10px}.wardrobe-live-head strong{font-size:16px}.wardrobe-live-head span{display:block;font-size:11px;color:var(--muted)}.wardrobe-live-stage{flex:1;min-height:390px;display:grid;place-items:center}.wardrobe-live-stage .avatar-sprite{width:min(250px,78%)}.wardrobe-loadout{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.wardrobe-loadout span{font-size:10px;border:1px solid rgba(91,59,40,.12);background:rgba(255,255,255,.46);border-radius:999px;padding:5px 8px}.wardrobe-reset{width:100%;margin-top:10px}.wardrobe-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.wardrobe-tab{border:1px solid rgba(91,59,40,.16);background:rgba(255,255,255,.35);color:var(--ink);border-radius:999px;padding:7px 11px;font-size:11px;font-weight:700;cursor:pointer}.wardrobe-tab.active{background:#3b2a21;color:#f6eadb;border-color:#3b2a21}.wardrobe-items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.piece-card{border:1px solid rgba(91,59,40,.14);border-radius:14px;background:rgba(255,255,255,.38);padding:9px;display:grid;gap:8px;transition:.16s ease}.piece-card:hover{transform:translateY(-2px)}.piece-card.equipped{outline:2px solid rgba(118,139,111,.55);background:rgba(118,139,111,.10)}.piece-preview{height:170px;border:1px solid rgba(91,59,40,.10);border-radius:11px;background:radial-gradient(circle at 50% 28%,rgba(255,249,239,.92),rgba(226,211,191,.55));display:grid;place-items:center;position:relative;overflow:hidden}.piece-sprite{width:100%;height:100%;background-repeat:no-repeat;background-size:200% 200%;image-rendering:pixelated}.piece-none{font-size:38px;color:rgba(58,40,30,.35);font-weight:700}.piece-name{font-size:12px;font-weight:800}.piece-card .btn{width:100%;min-height:34px;font-size:11px;padding:6px 8px}.piece-status{position:absolute;left:7px;top:7px;font-size:9px;padding:4px 6px;border-radius:999px;background:rgba(45,33,26,.82);color:#f8eddd;z-index:2}.wardrobe-loading{padding:36px;text-align:center;color:var(--muted)}
+ @media(max-width:1180px){.wardrobe-builder{grid-template-columns:1fr}.wardrobe-items{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:860px){.wardrobe-items{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.wardrobe-items{grid-template-columns:1fr}.piece-preview{height:150px}}
+ `;document.head.appendChild(style);
 })();
 
-function currentLookCode() {
-  return state.user?.user_metadata?.equipped_look || 'explorer';
+async function ensureAvatarAssets(){
+ if(avatarAssets)return avatarAssets;
+ if(!avatarAssetsPromise)avatarAssetsPromise=Promise.all(Object.entries(AVATAR_FILES).map(async([key,url])=>{const r=await fetch(`${url}?v=2`);if(!r.ok)throw new Error(`Falha ao carregar ${key}`);return [key,`data:image/webp;base64,${(await r.text()).trim()}`];})).then(entries=>avatarAssets=Object.fromEntries(entries)).catch(err=>{avatarAssetsPromise=null;console.error(err);showToast?.('Não consegui carregar o guarda-roupa.','error');throw err;});
+ return avatarAssetsPromise;
 }
-
-function currentLook() {
-  return COSMETIC_CATALOG.find(item => item.code === currentLookCode()) || COSMETIC_CATALOG[0];
+function getAvatarLoadout(){return {...DEFAULT_LOADOUT,...(state.user?.user_metadata?.avatar_loadout||{})};}
+function currentLookCode(){return getAvatarLoadout();}function currentLook(){return getAvatarLoadout();}
+function categoryItems(c){return AVATAR_CATALOG[c]||[];}function itemMeta(c,code){return categoryItems(c).find(x=>x.code===code);}function itemName(c,code){return itemMeta(c,code)?.name||'Base';}
+function spritePos(index=0){return [['0%','0%'],['100%','0%'],['0%','100%'],['100%','100%']][index]||['0%','0%'];}
+function spriteStyle(category,index){const [x,y]=spritePos(index);return `background-image:url('${avatarAssets?.[category]||''}');background-position:${x} ${y};`;}
+function avatarLayersMarkup(loadout=getAvatarLoadout()){
+ let html=`<img class="avatar-layer avatar-base-layer" src="${avatarAssets.base}" alt="Edd em pixel art">`;
+ for(const cat of ['pants','shirt','outerwear','hat','accessory']){const meta=itemMeta(cat,loadout[cat]);if(meta&&meta.code!=='none')html+=`<span class="avatar-layer avatar-sprite-layer layer-${cat}" style="${spriteStyle(cat,meta.index)}" aria-label="${escapeHtml(meta.name)}"></span>`;}
+ return html;
 }
-
-function cosmeticUnlocked(item) {
-  if (item.unlock === 'starter') return true;
-  if (item.unlock === 'level') return computeLevel(totalXp()).level >= item.level;
-  return false;
-}
-
-function spriteFallback(img, wrap) {
-  if (!img) return;
-  if (img.dataset.fallbackApplied === '1') return;
-  img.dataset.fallbackApplied = '1';
-  img.src = COSMETIC_CATALOG[0].asset;
-  wrap?.classList.add('asset-fallback');
-}
-
-function applyLookToSprite(wrap, code) {
-  if (!wrap) return;
-  const item = COSMETIC_CATALOG.find(x => x.code === code) || COSMETIC_CATALOG[0];
-  const img = wrap.querySelector('img');
-  wrap.dataset.look = item.code;
-  wrap.classList.remove('asset-fallback');
-  if (img) {
-    img.dataset.fallbackApplied = '0';
-    img.src = item.asset;
-    img.alt = `Avatar de Edd com o look ${item.name}`;
-    img.onerror = () => spriteFallback(img, wrap);
-  }
-  const tint = wrap.querySelector('.outfit-tint');
-  if (tint) tint.style.display = 'none';
-}
-
-function setAvatarSources() {
-  const look = currentLook();
-  applyLookToSprite($('#homeAvatarWrap'), look.code);
-  applyLookToSprite($('#sheetAvatarWrap'), look.code);
-}
-
-function cosmeticPreviewMarkup(item, current) {
-  const unlocked = cosmeticUnlocked(item);
-  const equipped = current === item.code;
-  return `<article class="cosmetic-card ${equipped ? 'equipped' : ''} ${unlocked ? '' : 'locked'}">
-    <div class="cosmetic-preview">
-      <div class="avatar-sprite wardrobe-preview" data-preview-look="${item.code}">
-        <img class="avatar-image" src="${item.asset}" alt="Preview do look ${escapeHtml(item.name)}">
-        <span class="outfit-tint" aria-hidden="true"></span>
-      </div>
-      <span class="cosmetic-rarity">${equipped ? 'equipado' : unlocked ? 'disponível' : `nível ${item.level}`}</span>
-    </div>
-    <div class="cosmetic-copy">
-      <h4>${escapeHtml(item.name)}</h4>
-      <p>${escapeHtml(item.detail)}</p>
-    </div>
-    <button class="btn ${equipped ? 'secondary' : 'primary'} small" data-equip-look="${item.code}" ${!unlocked ? 'disabled' : ''}>${equipped ? 'equipado' : unlocked ? 'equipar' : 'bloqueado'}</button>
-  </article>`;
-}
-
-function renderWardrobe() {
-  const grid = $('#wardrobeGrid');
-  if (!grid) return;
-  const current = currentLookCode();
-  const currentItem = COSMETIC_CATALOG.find(x => x.code === current) || COSMETIC_CATALOG[0];
-  $('#equippedLookLabel').textContent = `equipado: ${currentItem.name}`;
-  grid.innerHTML = COSMETIC_CATALOG.map(item => cosmeticPreviewMarkup(item, current)).join('');
-  $$('.wardrobe-preview', grid).forEach(wrap => applyLookToSprite(wrap, wrap.dataset.previewLook));
-}
-
-async function equipCosmetic(code) {
-  const item = COSMETIC_CATALOG.find(x => x.code === code);
-  if (!item) return;
-  if (!cosmeticUnlocked(item)) return showToast(`Esse look desbloqueia no nível ${item.level}.`, 'error');
-  const { data, error } = await db.auth.updateUser({ data: { equipped_look: code } });
-  if (error) return showToast(error.message, 'error');
-  if (data?.user) state.user = data.user;
-  setAvatarSources();
-  renderWardrobe();
-  showToast(`${item.name} equipado.`, 'success');
-}
+function renderAvatarStack(wrap,loadout=getAvatarLoadout()){if(!wrap)return;if(!avatarAssets){wrap.innerHTML='<span class="wardrobe-loading">carregando…</span>';ensureAvatarAssets().then(()=>renderAvatarStack(wrap,loadout));return;}wrap.classList.add('modular-avatar');wrap.innerHTML=avatarLayersMarkup(loadout);}
+function setAvatarSources(){const loadout=getAvatarLoadout();if(!avatarAssets){ensureAvatarAssets().then(setAvatarSources);return;}renderAvatarStack($('#homeAvatarWrap'),loadout);renderAvatarStack($('#sheetAvatarWrap'),loadout);}
+function loadoutSummary(loadout){return Object.entries(loadout).filter(([,v])=>v&&v!=='none').map(([c,v])=>`<span>${escapeHtml(itemName(c,v))}</span>`).join('')||'<span>visual base</span>';}
+function pieceCardMarkup(category,item,current){const equipped=current===item.code;return `<article class="piece-card ${equipped?'equipped':''}"><div class="piece-preview"><span class="piece-status">${equipped?'equipado':'disponível'}</span>${item.code==='none'?'<span class="piece-none">∅</span>':`<span class="piece-sprite" style="${spriteStyle(category,item.index)}"></span>`}</div><div class="piece-name">${escapeHtml(item.name)}</div><button class="btn ${equipped?'secondary':'primary'} small" data-equip-look="${category}:${item.code}">${equipped?'equipado':'equipar'}</button></article>`;}
+function renderWardrobeItems(){const host=$('#wardrobeItems');if(!host||!avatarAssets)return;const loadout=getAvatarLoadout();host.innerHTML=categoryItems(wardrobeCategory).map(item=>pieceCardMarkup(wardrobeCategory,item,loadout[wardrobeCategory])).join('');}
+function renderWardrobe(){const root=$('#wardrobeGrid');if(!root)return;if(!avatarAssets){root.innerHTML='<div class="wardrobe-loading">carregando guarda-roupa modular…</div>';ensureAvatarAssets().then(renderWardrobe);return;}const loadout=getAvatarLoadout(),count=Object.values(loadout).filter(v=>v&&v!=='none').length;$('#equippedLookLabel').textContent=`${count} peça${count===1?'':'s'} equipada${count===1?'':'s'}`;root.innerHTML=`<div class="wardrobe-builder"><section class="wardrobe-live"><div class="wardrobe-live-head"><div><strong>Seu Edd</strong><span>Monte o visual por camadas.</span></div><span>${count}/5 slots</span></div><div class="wardrobe-live-stage"><div class="avatar-sprite modular-avatar" id="wardrobeAvatar"></div></div><div class="wardrobe-loadout">${loadoutSummary(loadout)}</div><button class="btn secondary small wardrobe-reset" id="resetAvatarLoadout">voltar ao visual base</button></section><section class="wardrobe-catalog"><div class="wardrobe-tabs">${Object.entries(CATEGORY_LABELS).map(([k,l])=>`<button type="button" class="wardrobe-tab ${wardrobeCategory===k?'active':''}" data-wardrobe-category="${k}">${l}</button>`).join('')}</div><div class="wardrobe-items" id="wardrobeItems"></div></section></div>`;renderAvatarStack($('#wardrobeAvatar'),loadout);renderWardrobeItems();$$('.wardrobe-tab',root).forEach(btn=>btn.addEventListener('click',()=>{wardrobeCategory=btn.dataset.wardrobeCategory;renderWardrobe();}));$('#resetAvatarLoadout')?.addEventListener('click',()=>saveAvatarLoadout({...DEFAULT_LOADOUT},'Visual base restaurado.'));}
+async function saveAvatarLoadout(next,message='Visual atualizado.'){const {data,error}=await db.auth.updateUser({data:{avatar_loadout:next}});if(error)return showToast(error.message,'error');if(data?.user)state.user=data.user;setAvatarSources();renderWardrobe();showToast(message,'success');}
+async function equipCosmetic(encoded){const [category,code]=String(encoded||'').split(':');if(!CATEGORY_LABELS[category]||!categoryItems(category).some(x=>x.code===code))return;const next={...getAvatarLoadout(),[category]:code};await saveAvatarLoadout(next,code==='none'?`${CATEGORY_LABELS[category]} removido.`:`${itemName(category,code)} equipado.`);}
