@@ -1,0 +1,1 @@
+window.EDD_AVATAR_ASSETS={"base":"PLACEHOLDER"};
