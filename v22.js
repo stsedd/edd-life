@@ -1,10 +1,16 @@
+const QUEST_ART = {
+  scholar: 'assets/quest-scholar.svg',
+  wanderer: 'assets/quest-wanderer.svg',
+  organization: 'assets/quest-organization.svg'
+};
+
 function questArt(q, slot) {
   const title = (q?.title || '').toLowerCase();
   const category = (q?.category || '').toLowerCase();
-  if (title.includes('scholar') || title.includes('estud') || category.includes('growth')) return ASSETS.scholar;
-  if (title.includes('wander') || title.includes('mov') || title.includes('camin') || category.includes('home')) return ASSETS.wanderer;
-  if (title.includes('artific') || title.includes('artist') || title.includes('cri') || title.includes('inbox') || category.includes('organization')) return ASSETS.artist;
-  return [ASSETS.scholar, ASSETS.wanderer, ASSETS.artist][(slot - 1) % 3];
+  if (title.includes('scholar') || title.includes('estud') || category.includes('growth')) return QUEST_ART.scholar;
+  if (title.includes('wander') || title.includes('mov') || title.includes('camin') || category.includes('home')) return QUEST_ART.wanderer;
+  if (title.includes('artific') || title.includes('artist') || title.includes('cri') || title.includes('inbox') || category.includes('organization')) return QUEST_ART.organization;
+  return [QUEST_ART.scholar, QUEST_ART.wanderer, QUEST_ART.organization][(slot - 1) % 3];
 }
 
 function questRoman(slot) {
