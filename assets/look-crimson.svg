@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 307 384" width="307" height="384" shape-rendering="crispEdges">
+  <image href="edd.webp" x="0" y="0" width="307" height="384"/>
+  <g opacity=".98">
+    <path d="M96 171 125 150 167 154 202 171 206 220 191 255 174 256 166 224 140 224 127 256 104 252 92 221Z" fill="#8f2438"/>
+    <path d="M111 168 130 155 153 157 149 220 132 220 122 194Z" fill="#bb394f"/>
+    <path d="M155 156 178 156 197 169 186 196 178 220 156 220Z" fill="#7d2132"/>
+    <rect x="141" y="161" width="28" height="59" fill="#18171d"/>
+    <path d="M130 155 177 155 169 173 138 173Z" fill="#f0cdb0"/>
+  </g>
+</svg>
