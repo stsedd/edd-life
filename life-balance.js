@@ -4,12 +4,12 @@
 
   const originalTaskMatches = taskMatches;
   taskMatches = function(task,f,scope){
-    if(task.kind==='moment' || task.kind==='presence') return false;
+    if(task.source==='life_moment' || task.source==='life_presence') return false;
     return originalTaskMatches(task,f,scope);
   };
 
   function lifeTasks(kind){
-    return state.tasks.filter(t=>t.kind===kind && t.status!=='cancelled');
+    return state.tasks.filter(t=>t.source===`life_${kind}` && t.status!=='cancelled');
   }
   function focusAreasForTask(taskId){
     return [...new Set(state.focusEvents.filter(e=>e.task_id===taskId && e.area_id).map(e=>e.area_id))];
@@ -70,18 +70,22 @@
     const {error}=await db.from('focus_events').insert(rows);
     if(error)throw error;
   }
+  async function zeroHiddenTaskRewards(id){
+    const {error}=await db.from('tasks').update({xp_base:0,coin_base:0,focus_base:0}).eq('id',id).eq('user_id',state.user.id);
+    if(error)console.error(error);
+  }
 
   async function saveMoment(){
     const note=document.getElementById('momentText')?.value.trim();
     if(!note)return showToast('Escreva o que aconteceu.','error');
     if(!state.momentAreas.length)return showToast('Escolha pelo menos uma área da vida.','error');
     const payload={
-      user_id:state.user.id,title:note,description:null,kind:'moment',difficulty:'moment',priority:'low',status:'completed',
-      scheduled_for:isoDateLocal(),completed_at:new Date().toISOString(),area_id:state.momentAreas[0],project_id:null,source:'life_event',
-      xp_base:0,coin_base:0,focus_base:0
+      user_id:state.user.id,title:note,description:null,kind:'task',difficulty:'micro',priority:'low',status:'completed',
+      scheduled_for:isoDateLocal(),completed_at:new Date().toISOString(),area_id:state.momentAreas[0],project_id:null,source:'life_moment'
     };
     const {data,error}=await db.from('tasks').insert(payload).select('*').single();
     if(error)return showToast(error.message,'error');
+    await zeroHiddenTaskRewards(data.id);
     try{await insertLifeFocus(data.id,state.momentAreas);}catch(err){console.error(err);}
     closeMoment(); state.momentAreas=[]; await refreshCore(); renderAll(); showToast('Momento registrado na Crônica.','success');
   }
@@ -96,13 +100,13 @@
     let task=presenceTaskToday();
     if(!task){
       const payload={
-        user_id:state.user.id,title:'Presença do dia',kind:'presence',difficulty:'moment',priority:'low',status:'completed',
-        scheduled_for:isoDateLocal(),completed_at:new Date().toISOString(),project_id:null,area_id:null,source:'life_event',
-        xp_base:0,coin_base:0,focus_base:0
+        user_id:state.user.id,title:'Presença do dia',kind:'task',difficulty:'micro',priority:'low',status:'completed',
+        scheduled_for:isoDateLocal(),completed_at:new Date().toISOString(),project_id:null,area_id:null,source:'life_presence'
       };
       const created=await db.from('tasks').insert(payload).select('*').single();
       if(created.error){console.error(created.error);return showToast('O check-in foi salvo, mas não consegui registrar as áreas.','error');}
       task=created.data;
+      await zeroHiddenTaskRewards(task.id);
     } else {
       await db.from('focus_events').delete().eq('user_id',state.user.id).eq('task_id',task.id);
     }
@@ -185,7 +189,7 @@
     baseRenderCharacter();
     const stats=[...document.querySelectorAll('#sheetStats .sheet-stat')];
     const target=stats.find(s=>s.querySelector('span')?.textContent==='Tarefas concluídas');
-    if(target){const strong=target.querySelector('strong');if(strong)strong.textContent=state.tasks.filter(t=>t.status==='completed'&&!['moment','presence'].includes(t.kind)).length;}
+    if(target){const strong=target.querySelector('strong');if(strong)strong.textContent=state.tasks.filter(t=>t.status==='completed'&&!['life_moment','life_presence'].includes(t.source)).length;}
   };
 
   document.addEventListener('click',e=>{
