@@ -210,3 +210,6 @@
     if(e.target.matches('[data-quest-progress]'))await setQuestProgress(e.target.dataset.questProgress,e.target.value);
   });
 })();
+
+document.write('<link rel="stylesheet" href="life-balance.css?v=1">');
+document.write('<script src="life-balance.js?v=1"><\/script>');
