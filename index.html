@@ -3,42 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#2f241d" />
+  <meta name="theme-color" content="#30231c" />
   <title>Edd's Life</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Pixelify+Sans:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <div class="noise" aria-hidden="true"></div>
+
   <section class="auth-gate" id="authGate">
-    <div class="auth-panel card">
-      <div class="auth-brand">
-        <div class="brand-rune large">✦</div>
-        <div>
-          <p class="eyebrow">EDD'S LIFE</p>
-          <h1>Entre na sua campanha.</h1>
-          <p class="muted">O login mantém tarefas, XP, moedas e check-ins iguais no computador e no celular.</p>
-        </div>
-      </div>
+    <div class="auth-panel rpg-panel">
+      <div class="auth-sigil">✦</div>
+      <p class="eyebrow">EDD'S LIFE</p>
+      <h1>Entre na sua campanha.</h1>
+      <p class="muted auth-copy">Tarefas, XP, moedas e check-ins sincronizados entre computador e celular.</p>
       <form id="authForm" class="auth-form">
         <label>E-mail<input id="authEmail" type="email" autocomplete="email" required placeholder="voce@email.com"></label>
         <label>Senha<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••"></label>
         <div class="auth-actions">
-          <button class="primary-action" type="submit" data-auth-action="signin">Entrar</button>
-          <button class="secondary-action" type="button" id="signUpButton">Criar conta</button>
+          <button class="btn primary" type="submit">Entrar</button>
+          <button class="btn secondary" type="button" id="signUpButton">Criar conta</button>
         </div>
-        <p id="authMessage" class="small-note"></p>
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
       </form>
     </div>
   </section>
 
   <div class="app-shell" id="appShell" hidden>
-    <aside class="sidebar panel-dark">
+    <aside class="sidebar">
       <div>
         <div class="brand">
-          <div class="brand-rune">✦</div>
+          <div class="brand-icon">✦</div>
           <div>
             <h1>EDD</h1>
             <p>same person.<br>higher standards.</p>
@@ -46,185 +44,217 @@
         </div>
 
         <nav class="nav-list" aria-label="Navegação principal">
-          <button class="nav-item active" data-view="today">Hoje</button>
-          <button class="nav-item" data-view="tasks">Tarefas</button>
-          <button class="nav-item" data-view="inbox">Inbox <span class="pill-count" id="inboxCount">0</span></button>
-          <button class="nav-item" data-view="quests">Quests</button>
-          <button class="nav-item" data-view="character">Ficha</button>
-          <button class="nav-item" data-view="shop">Loja</button>
-          <button class="nav-item" data-view="chronicle">Crônica</button>
+          <button class="nav-item active" data-view="today"><span>Hoje</span></button>
+          <button class="nav-item" data-view="tasks"><span>Tarefas</span></button>
+          <button class="nav-item" data-view="inbox"><span>Inbox</span><span class="nav-badge" id="inboxCount">0</span></button>
+          <button class="nav-item" data-view="quests"><span>Quests</span></button>
+          <button class="nav-item" data-view="character"><span>Ficha</span></button>
+          <button class="nav-item" data-view="shop"><span>Loja</span></button>
+          <button class="nav-item" data-view="chronicle"><span>Crônica</span></button>
         </nav>
 
-        <section class="sidebar-section">
-          <div class="sidebar-label">Projetos</div>
-          <div class="project-stack" id="sidebarProjects"></div>
+        <section class="sidebar-projects">
+          <p class="sidebar-label">Projetos</p>
+          <div id="sidebarProjects" class="project-stack"></div>
         </section>
       </div>
 
       <footer class="sidebar-footer">
         <span id="userEmail"></span>
-        <button class="link-button" id="signOutButton">sair</button>
+        <button class="text-button" id="signOutButton">sair</button>
       </footer>
     </aside>
 
     <main class="workspace">
-      <header class="hero card">
+      <header class="hero rpg-panel">
         <div>
-          <p class="eyebrow" id="pageEyebrow">EDD'S LIFE</p>
+          <p class="eyebrow" id="pageEyebrow">HOJE</p>
           <h2 id="pageTitle">Bom dia, Edd.</h2>
-          <p class="muted" id="pageSubtitle">Pequenos passos também constroem grandes jornadas.</p>
+          <p class="muted" id="pageSubtitle">Tudo num lugar só, com menos atrito e mais jogo.</p>
         </div>
-        <button class="primary-action" id="quickAdd">＋ adicionar tarefa</button>
+        <div class="hero-actions">
+          <button class="btn secondary" id="voiceCaptureButton">🎙️ áudio <span class="soon">em breve</span></button>
+          <button class="btn primary" id="quickAdd">＋ adicionar tarefa</button>
+        </div>
       </header>
 
-      <section class="app-view active" data-view-panel="today">
-        <section class="stats-grid" aria-label="Resumo do dia">
-          <article class="card stat-card">
-            <span class="label">Nível</span>
-            <div class="stat-line"><strong id="levelValue">1</strong><span id="xpProgressText">0 / 500 XP</span></div>
-            <div class="progress"><span id="xpProgressBar" style="width:0%"></span></div>
-          </article>
-          <article class="card stat-card">
-            <span class="label">Moedas</span>
-            <div class="stat-line"><strong id="coinValue">0</strong><span id="coinWeek">0 esta semana</span></div>
-          </article>
-          <article class="card stat-card">
-            <span class="label">Humor</span>
-            <div class="stat-line"><strong class="word-stat" id="moodValue">—</strong><span id="moodPeriod">sem check-in</span></div>
-          </article>
-          <article class="card stat-card">
-            <span class="label">Energia</span>
-            <div class="mini-energy" id="energyMini" aria-label="Energia"><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></div>
-            <span class="small-note" id="energyMiniText">faça seu check-in</span>
-          </article>
-        </section>
+      <section class="checkin-wrap" id="checkinSpotlight"></section>
 
-        <section class="main-grid">
-          <section class="card task-card">
-            <div class="card-head">
-              <div><h3>Tarefas</h3><p class="muted">O que precisa acontecer agora.</p></div>
-              <div class="tabs" id="todayTabs">
-                <button class="tab active" data-filter="today">Hoje</button>
-                <button class="tab" data-filter="tomorrow">Amanhã</button>
-                <button class="tab" data-filter="week">Semana</button>
-                <button class="tab" data-filter="later">Depois</button>
+      <section class="app-view active" data-view-panel="today">
+        <section class="stats-grid" id="statsGrid"></section>
+
+        <section class="home-grid">
+          <section class="rpg-panel task-hub">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">MISSION CONTROL</p>
+                <h3>Quadro geral de tarefas</h3>
+                <p class="muted">Todas as tarefas abertas, inclusive as que estão longe. Use busca e filtros para escolher o que faz sentido agora.</p>
               </div>
+              <button class="btn secondary small" data-go-view="tasks">abrir planner</button>
             </div>
-            <div class="task-list" id="todayTaskList"></div>
+            <div class="filter-grid" id="homeTaskFilters"></div>
+            <div class="task-table" id="todayTaskList"></div>
           </section>
 
-          <aside class="right-stack">
-            <section class="card character-card">
-              <div class="pixel-placeholder" aria-label="Placeholder para portrait em pixel art">
-                <div class="pixel-head"></div><div class="pixel-hair"></div><div class="pixel-neck"></div><div class="pixel-coat"></div>
-                <span>portrait pixel art<br>em produção</span>
+          <aside class="home-rail">
+            <section class="rpg-panel avatar-card">
+              <div class="section-head compact">
+                <div>
+                  <p class="eyebrow">PERSONAGEM</p>
+                  <h3>Edd</h3>
+                </div>
+                <button class="chip" data-go-view="character">ficha</button>
               </div>
-              <div class="character-copy">
-                <p class="eyebrow">EDD</p>
-                <h3>Human being in progress.</h3>
-                <p class="muted">O portrait final será pixel art e os cosméticos entram na Ficha.</p>
-                <button class="secondary-action" data-go-view="character">Ver ficha</button>
+              <div class="avatar-stage">
+                <div class="avatar-glow"></div>
+                <img id="homeAvatar" class="avatar-image" alt="Edd em pixel art" />
+              </div>
+              <div class="avatar-footer">
+                <strong>Arquiteto da rotina</strong>
+                <span class="muted">Progresso real, com cara de jogo.</span>
               </div>
             </section>
 
-            <section class="card quest-card">
-              <div class="card-head compact-head"><h3>Quest da semana</h3><span class="small-note" id="questWeekLabel"></span></div>
-              <div id="activeQuestMini" class="empty-state compact">Escolha uma quest na aba Quests.</div>
-            </section>
+            <section class="rpg-panel mini-card" id="activeQuestMini"></section>
+            <section class="rpg-panel mini-card" id="featuredReward"></section>
           </aside>
         </section>
 
-        <section class="bottom-grid">
-          <section class="card checkin-card">
-            <div class="card-head compact-head"><h3>Check-in</h3><select id="checkinPeriod"><option value="morning">Início do dia</option><option value="evening">Fim do dia</option></select></div>
-            <p class="form-label">Humor</p>
-            <div class="mood-row" id="moodSelector">
-              <button class="mood" data-mood="Feliz">😊</button><button class="mood" data-mood="Tranquilo">😌</button><button class="mood" data-mood="Normal">😐</button><button class="mood" data-mood="Ansioso">😣</button><button class="mood" data-mood="Irritado">😡</button><button class="mood" data-mood="Triste">😞</button><button class="mood" data-mood="Inspirado">✨</button>
-            </div>
-            <p class="form-label">Energia</p>
-            <div class="energy-selector" id="energySelector"><button data-level="1"></button><button data-level="2"></button><button data-level="3"></button><button data-level="4"></button><button data-level="5"></button></div>
-            <p class="small-note" id="energyBonus">Selecione sua energia.</p>
-            <textarea id="checkinNote" placeholder="Alguma nota para hoje?"></textarea>
-            <button class="secondary-action full" id="saveCheckin">Salvar check-in</button>
-          </section>
-
-          <section class="card goal-card">
-            <div class="card-head compact-head"><h3>Meta em destaque</h3></div>
-            <div id="featuredReward" class="empty-state compact">Crie uma recompensa em destaque na Loja.</div>
-          </section>
-
-          <section class="card achievements-card">
-            <div class="card-head compact-head"><h3>Conquistas</h3></div>
-            <div id="achievementPreview" class="empty-state compact">Suas conquistas aparecem aqui conforme o sistema evolui.</div>
-          </section>
-
-          <section class="card wheel-card">
-            <div class="card-head compact-head"><h3>Roda da Vida</h3><span class="small-note">últimos 7 dias</span></div>
-            <div id="wheelContainer"></div>
-          </section>
-        </section>
+        <section class="answered-checkin-slot" id="answeredCheckinCompact"></section>
       </section>
 
       <section class="app-view" data-view-panel="tasks">
-        <section class="card page-card">
-          <div class="card-head"><div><h3>Todas as tarefas</h3><p class="muted">Planejamento e prazo são coisas diferentes.</p></div><div class="filter-row"><select id="taskStatusFilter"><option value="open">Abertas</option><option value="all">Todas</option><option value="completed">Concluídas</option></select><select id="taskProjectFilter"><option value="all">Todos os projetos</option></select></div></div>
-          <div id="allTaskList" class="task-list"></div>
+        <section class="rpg-panel page-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">PLANNER</p>
+              <h3>Todas as tarefas</h3>
+              <p class="muted">Procure pelo nome, filtre por data, prioridade, dificuldade, projeto e status. Planejamento e prazo continuam separados.</p>
+            </div>
+            <button class="btn primary small" id="plannerAdd">＋ tarefa</button>
+          </div>
+          <div class="filter-grid planner-filters" id="plannerTaskFilters"></div>
+          <div class="task-table" id="allTaskList"></div>
         </section>
       </section>
 
       <section class="app-view" data-view-panel="inbox">
-        <section class="card page-card"><div class="card-head"><div><h3>Inbox</h3><p class="muted">Capture primeiro. Organize depois.</p></div></div><div id="inboxTaskList" class="task-list"></div></section>
+        <section class="rpg-panel page-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">CAPTURA</p>
+              <h3>Inbox</h3>
+              <p class="muted">Coisas jogadas aqui ainda não precisam ter data. Você organiza quando tiver espaço mental.</p>
+            </div>
+            <button class="btn primary small" id="inboxAdd">＋ capturar</button>
+          </div>
+          <div class="task-table" id="inboxTaskList"></div>
+        </section>
       </section>
 
       <section class="app-view" data-view-panel="quests">
-        <section class="card page-card"><div class="card-head"><div><h3>Escolha sua Quest da Semana</h3><p class="muted">Escolha uma carta, rerrole uma delas uma vez ou não escolha nenhuma.</p></div></div><div class="quest-grid" id="questGrid"></div></section>
+        <section class="rpg-panel page-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">QUESTS DA SEMANA</p>
+              <h3>Escolha uma carta</h3>
+              <p class="muted">A carta é bônus, não cobrança. Escolha uma, rerrole uma vez ou simplesmente deixe a semana sem quest.</p>
+            </div>
+            <span class="week-label" id="questWeekLabel"></span>
+          </div>
+          <div class="quest-grid" id="questGrid"></div>
+        </section>
       </section>
 
       <section class="app-view" data-view-panel="character">
-        <section class="character-page-grid">
-          <section class="card character-sheet">
-            <div class="large-pixel-placeholder"><div class="pixel-placeholder"><div class="pixel-head"></div><div class="pixel-hair"></div><div class="pixel-neck"></div><div class="pixel-coat"></div><span>EDD · base portrait</span></div></div>
-            <div><p class="eyebrow">FICHA</p><h3>Edd</h3><p class="muted">Um único nível geral. A Roda da Vida mede foco, não poder.</p><div class="sheet-stats"><div><span>Nível</span><strong id="sheetLevel">1</strong></div><div><span>XP total</span><strong id="sheetXp">0</strong></div><div><span>Moedas</span><strong id="sheetCoins">0</strong></div><div><span>Tarefas concluídas</span><strong id="sheetCompleted">0</strong></div></div></div>
+        <section class="character-layout">
+          <section class="rpg-panel character-main">
+            <div class="character-portrait">
+              <div class="avatar-glow large"></div>
+              <img id="sheetAvatar" class="avatar-image large" alt="Edd em pixel art" />
+            </div>
+            <div class="character-info">
+              <p class="eyebrow">FICHA DE PERSONAGEM</p>
+              <h3>Edd</h3>
+              <p class="title-line">Arquiteto da rotina</p>
+              <p class="muted">Um único nível geral. Sem subnível por área e sem punição por dias ruins.</p>
+              <div class="sheet-stats" id="sheetStats"></div>
+              <div class="profile-badge" id="profileBadge"></div>
+            </div>
           </section>
-          <section class="card page-card"><div class="card-head"><h3>Conquistas disponíveis</h3></div><div id="achievementList" class="achievement-grid"></div></section>
         </section>
       </section>
 
       <section class="app-view" data-view-panel="shop">
-        <section class="card page-card"><div class="card-head"><div><h3>Loja</h3><p class="muted">Moedas viram permissões reais; XP nunca é gasto.</p></div><button class="secondary-action" id="newRewardButton">＋ recompensa</button></div><div class="reward-grid" id="rewardGrid"></div></section>
+        <section class="rpg-panel page-panel">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">RECOMPENSAS</p>
+              <h3>Loja do Edd</h3>
+              <p class="muted">XP é permanente. Moedas são para gastar em permissões reais e coisas que você quer.</p>
+            </div>
+            <button class="btn secondary small" id="newRewardButton">＋ recompensa</button>
+          </div>
+          <div class="reward-grid" id="rewardGrid"></div>
+        </section>
       </section>
 
       <section class="app-view" data-view-panel="chronicle">
         <section class="chronicle-grid">
-          <section class="card page-card"><div class="card-head"><h3>Roda da Vida</h3><span class="small-note">últimos 7 dias</span></div><div id="chronicleWheel"></div></section>
-          <section class="card page-card"><div class="card-head"><h3>Humor & energia</h3></div><div id="checkinHistory" class="history-list"></div></section>
-          <section class="card page-card full-span"><div class="card-head"><h3>Extrato de progresso</h3></div><div id="progressLedger" class="history-list"></div></section>
+          <section class="rpg-panel page-panel chronicle-wheel">
+            <div class="section-head compact">
+              <div>
+                <p class="eyebrow">RODA DA VIDA</p>
+                <h3>Distribuição de foco</h3>
+              </div>
+              <span class="week-label">últimos 7 dias</span>
+            </div>
+            <div id="chronicleWheel"></div>
+          </section>
+
+          <section class="rpg-panel page-panel">
+            <div class="section-head compact"><div><p class="eyebrow">CHECK-INS</p><h3>Humor & energia</h3></div></div>
+            <div class="history-list" id="checkinHistory"></div>
+          </section>
+
+          <section class="rpg-panel page-panel full-span">
+            <div class="section-head compact"><div><p class="eyebrow">PROGRESSO</p><h3>Extrato da campanha</h3></div></div>
+            <div class="history-list" id="progressLedger"></div>
+          </section>
         </section>
       </section>
     </main>
   </div>
 
   <div class="modal-backdrop" id="taskModal" hidden>
-    <form class="modal card" id="taskForm">
-      <div class="modal-head"><div><p class="eyebrow">NOVA ENTRADA</p><h3>Adicionar tarefa</h3></div><button type="button" class="icon-button" data-close-modal="taskModal">×</button></div>
+    <form class="modal rpg-panel" id="taskForm">
+      <div class="modal-head">
+        <div><p class="eyebrow">NOVA ENTRADA</p><h3 id="taskModalTitle">Adicionar tarefa</h3></div>
+        <button type="button" class="icon-button" data-close-modal="taskModal">×</button>
+      </div>
       <label>Título<input id="taskTitle" required placeholder="Ex.: Post da Ana"></label>
-      <div class="form-grid three"><label>Tipo<select id="taskKind"><option value="task">Tarefa</option><option value="routine">Rotina</option></select></label><label>Dificuldade<select id="taskDifficulty"><option value="micro">Micro</option><option value="simple">Simples</option><option value="medium" selected>Média</option><option value="complex">Complexa</option><option value="epic">Épica</option></select></label><label>Prioridade<select id="taskPriority"><option value="low">Baixa</option><option value="normal" selected>Normal</option><option value="high">Alta</option><option value="urgent">Urgente</option></select></label></div>
+      <div class="form-grid three">
+        <label>Tipo<select id="taskKind"><option value="task">Tarefa</option><option value="routine">Rotina</option></select></label>
+        <label>Dificuldade<select id="taskDifficulty"><option value="micro">Micro</option><option value="simple">Simples</option><option value="medium" selected>Média</option><option value="complex">Complexa</option><option value="epic">Épica</option></select></label>
+        <label>Prioridade<select id="taskPriority"><option value="low">Baixa</option><option value="normal" selected>Normal</option><option value="high">Alta</option><option value="urgent">Urgente</option></select></label>
+      </div>
       <div class="form-grid two"><label>Projeto<select id="taskProject"></select></label><label>Área<select id="taskArea"></select></label></div>
-      <div class="form-grid two"><label>Planejada para<input id="taskScheduled" type="date"></label><label>Prazo<input id="taskDue" type="datetime-local"></label></div>
+      <div class="form-grid two"><label>Planejada para<input id="taskScheduled" type="date"></label><label>Prazo real<input id="taskDue" type="datetime-local"></label></div>
       <label>Contexto / cliente<input id="taskContext" placeholder="Ex.: Ana, entregar para Manu"></label>
       <label>Notas<textarea id="taskDescription" placeholder="Detalhes opcionais"></textarea></label>
-      <div class="modal-actions"><button type="button" class="secondary-action" id="sendToInbox">Salvar na Inbox</button><button class="primary-action" type="submit">Criar tarefa</button></div>
+      <div class="modal-actions"><button type="button" class="btn secondary" id="sendToInbox">Salvar na Inbox</button><button class="btn primary" type="submit">Salvar tarefa</button></div>
     </form>
   </div>
 
   <div class="modal-backdrop" id="rewardModal" hidden>
-    <form class="modal card small-modal" id="rewardForm">
-      <div class="modal-head"><div><p class="eyebrow">LOJA</p><h3>Nova recompensa</h3></div><button type="button" class="icon-button" data-close-modal="rewardModal">×</button></div>
-      <label>Nome<input id="rewardName" required placeholder="Ex.: Delivery"></label>
-      <label>Custo em moedas<input id="rewardCost" type="number" min="1" required value="500"></label>
-      <label>Descrição<textarea id="rewardDescription" placeholder="O que essa recompensa libera?"></textarea></label>
-      <label class="check-label"><input id="rewardFeatured" type="checkbox"> deixar em destaque</label>
-      <button class="primary-action full" type="submit">Criar recompensa</button>
+    <form class="modal rpg-panel small-modal" id="rewardForm">
+      <div class="modal-head"><div><p class="eyebrow">NOVA RECOMPENSA</p><h3>Loja</h3></div><button type="button" class="icon-button" data-close-modal="rewardModal">×</button></div>
+      <label>Nome<input id="rewardName" required placeholder="Ex.: Comprar um livro"></label>
+      <label>Custo em moedas<input id="rewardCost" type="number" min="1" required value="250"></label>
+      <label>Descrição<textarea id="rewardDescription" placeholder="Por que essa recompensa é gostosa?"></textarea></label>
+      <label class="checkbox-label"><input id="rewardFeatured" type="checkbox"> Mostrar como meta em destaque</label>
+      <div class="modal-actions"><button class="btn primary" type="submit">Criar recompensa</button></div>
     </form>
   </div>
 
