@@ -1,0 +1,54 @@
+/* v2.1 visual polish — normal typography, RPG cards and cosmetic wardrobe */
+:root{
+  --display:'Outfit',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --body:'Outfit',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+
+body{font-family:var(--body)}
+.eyebrow,.sidebar-label,.stat-label,.field-label,.filter-field label{font-family:var(--body);font-weight:800;letter-spacing:.10em}
+.brand h1,.hero h2,.section-head h3,.character-info h3,.quest-card h4,.reward-card h4,.stat-value,.sheet-stat strong,.checkin-head h3,.mini-card h3,.avatar-footer strong,.auth-panel h1{font-family:var(--body)}
+.brand h1{letter-spacing:.04em;font-weight:800}
+.hero h2{font-weight:800;letter-spacing:-.035em}
+.section-head h3,.character-info h3,.checkin-head h3{font-weight:800;letter-spacing:-.02em}
+.stat-value{font-weight:800;letter-spacing:-.04em}
+
+.avatar-stage,.character-portrait{isolation:isolate}
+.avatar-sprite{position:relative;z-index:2;width:min(285px,84%);display:grid;place-items:end center}
+.avatar-sprite.large{width:min(380px,92%)}
+.avatar-sprite .avatar-image{width:100%;max-width:none;position:relative;z-index:1}
+.outfit-tint{position:absolute;inset:0;z-index:2;pointer-events:none;background:var(--look-color,transparent);opacity:var(--look-opacity,0);mix-blend-mode:color;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center bottom;mask-position:center bottom;-webkit-mask-size:contain;mask-size:contain;clip-path:inset(43% 0 0 0)}
+
+.character-layout{display:grid;gap:18px}
+.wardrobe-panel{padding:18px 20px}
+.wardrobe-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.cosmetic-card{border:1px solid rgba(91,59,40,.14);background:rgba(255,255,255,.30);border-radius:16px;padding:12px;display:grid;gap:11px;transition:.18s ease}
+.cosmetic-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.42)}
+.cosmetic-card.equipped{outline:2px solid rgba(112,134,113,.55);background:rgba(112,134,113,.10)}
+.cosmetic-card.locked{opacity:.62}
+.cosmetic-preview{min-height:190px;border-radius:13px;border:1px solid rgba(91,59,40,.13);background:radial-gradient(circle at 50% 24%,rgba(255,252,239,.9),transparent 30%),linear-gradient(180deg,rgba(138,87,64,.07),rgba(255,255,255,.10));display:grid;place-items:center;position:relative;overflow:hidden}
+.wardrobe-preview{width:min(145px,82%)}
+.cosmetic-rarity{position:absolute;left:9px;top:9px;padding:5px 7px;border-radius:999px;background:rgba(45,33,26,.78);color:#f8eddd;font-size:10px;font-weight:800}
+.cosmetic-copy h4{margin:0 0 4px;font-size:16px;font-weight:800}
+.cosmetic-copy p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+
+.quest-grid{align-items:stretch;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.quest-card.tarot{padding:0;border:0;border-radius:15px;background:#1e1713;color:#f3dfb6;box-shadow:0 15px 28px rgba(45,27,17,.22);min-height:560px;overflow:hidden;transition:.18s ease}
+.quest-card.tarot:hover{transform:translateY(-4px) rotate(.2deg);box-shadow:0 20px 36px rgba(45,27,17,.28)}
+.quest-card.tarot.selected{outline:3px solid rgba(210,170,88,.78);outline-offset:3px}
+.tarot-frame{min-height:100%;padding:14px;margin:8px;border:1px solid rgba(219,172,82,.82);position:relative;display:grid;grid-template-rows:auto 230px auto auto auto auto;gap:12px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 22%),radial-gradient(circle at 50% 20%,rgba(122,74,47,.26),transparent 45%)}
+.tarot-frame::before,.tarot-frame::after{content:"";position:absolute;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,rgba(219,172,82,.75),transparent)}
+.tarot-frame::before{top:37px}.tarot-frame::after{bottom:13px}
+.tarot-corners i{position:absolute;width:18px;height:18px;border-color:rgba(219,172,82,.86);border-style:solid}
+.tarot-corners i:nth-child(1){left:6px;top:6px;border-width:1px 0 0 1px}.tarot-corners i:nth-child(2){right:6px;top:6px;border-width:1px 1px 0 0}.tarot-corners i:nth-child(3){left:6px;bottom:6px;border-width:0 0 1px 1px}.tarot-corners i:nth-child(4){right:6px;bottom:6px;border-width:0 1px 1px 0}
+.tarot-kicker{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:800;letter-spacing:.12em;color:#d9b56e;text-transform:uppercase;padding:0 6px}
+.tarot-art{border-radius:3px;overflow:hidden;border:1px solid rgba(219,172,82,.7);background:#31221b;position:relative}.tarot-art::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 6px rgba(27,20,17,.16);pointer-events:none}.tarot-art img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;filter:saturate(.82) contrast(1.05) sepia(.08)}
+.tarot-title{display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:center}.tarot-title h4{margin:0;font-size:20px;font-weight:800;text-align:center;color:#f4dfb8;letter-spacing:.01em}.tarot-rule{height:1px;background:linear-gradient(90deg,transparent,#d9b56e)}.tarot-rule:last-child{background:linear-gradient(90deg,#d9b56e,transparent)}
+.tarot-description{margin:0!important;color:#d7c6aa!important;line-height:1.48!important;font-size:12px!important;text-align:center}.tarot-progress{background:rgba(255,255,255,.10)}.tarot-progress span{background:linear-gradient(90deg,#9b623f,#d1a75d)}.tarot-meta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;color:#e3c987;font-size:11px;font-weight:800}.tarot .quest-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}.tarot .btn{border-radius:8px;box-shadow:none}.tarot .btn.secondary{background:rgba(255,255,255,.08);color:#f4dfb8;border-color:rgba(219,172,82,.35)}.tarot .btn.primary{background:linear-gradient(180deg,#a86d3f,#77442d)}
+.free-week-card .tarot-frame{grid-template-rows:auto 230px auto auto auto}.free-week-moon{height:230px;display:grid;place-items:center;border:1px solid rgba(219,172,82,.65);font-size:72px;color:#d5b265;background:radial-gradient(circle,rgba(204,166,93,.10),transparent 55%)}
+
+.mini-quest.tarot-mini{grid-template-columns:104px 1fr;align-items:center}.mini-tarot-card{position:relative;background:#211813;border:1px solid rgba(210,170,88,.74);padding:7px;border-radius:8px;display:grid;gap:5px;color:#f1d9aa}.mini-tarot-card::before{content:"";position:absolute;inset:4px;border:1px solid rgba(210,170,88,.35);pointer-events:none}.mini-tarot-card img{width:100%;aspect-ratio:.86;object-fit:cover;border:1px solid rgba(210,170,88,.55);image-rendering:pixelated}.mini-tarot-card strong{font-size:9px;text-align:center;line-height:1.1;position:relative;z-index:1}.mini-tarot-kicker{font-size:9px;text-align:center;color:#d9b56e;font-weight:800;position:relative;z-index:1}
+
+.rpg-panel{border-radius:18px}.btn{border-radius:12px}input,textarea,select{border-radius:12px}.nav-item,.project-stack button{border-radius:11px}.task-row{border-radius:12px}
+
+@media(max-width:1320px){.quest-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wardrobe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.quest-grid,.wardrobe-grid{grid-template-columns:1fr}.quest-card.tarot{min-height:520px}.tarot-frame{grid-template-rows:auto 220px auto auto auto auto}.mini-quest.tarot-mini{grid-template-columns:92px 1fr}}
