@@ -3,10 +3,10 @@ const SUPABASE_KEY = 'sb_publishable_QFB2OR4tYtX1wBkLS5JK7g_UPhpjZUs';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ASSETS = {
-  edd: 'assets/edd.svg',
-  scholar: 'assets/quest-scholar.svg',
-  wanderer: 'assets/quest-wanderer.svg',
-  artist: 'assets/quest-artist.svg'
+  edd: 'assets/edd.webp',
+  scholar: 'assets/quest-scholar.webp',
+  wanderer: 'assets/quest-wanderer.webp',
+  artist: 'assets/quest-artist.webp'
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
