@@ -153,3 +153,6 @@ function renderQuestMini() {
     if (questEl) questEl.textContent = q?.title || 'nenhuma selecionada';
   };
 })();
+
+document.write('<link rel="stylesheet" href="focus-layout.css?v=1">');
+document.write('<script src="focus-layout.js?v=1"><\/script>');
