@@ -78,3 +78,5 @@ function renderQuestMini() {
       </div>
     </div>`;
 }
+
+document.write('<script src="wardrobe-fix.js?v=3"><\/script>');
