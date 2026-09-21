@@ -1,30 +1,11 @@
-const AVATAR_SVG_PATH = 'assets/edd.svg';
-let avatarResolvedSrc = null;
-let avatarResolvePromise = null;
+const AVATAR_ASSET_PATH = 'assets/edd.webp';
 
 const COSMETIC_CATALOG = [
   { code:'explorer', name:'Explorador de Café', tint:'transparent', opacity:0, unlock:'starter', detail:'Look base · jaqueta marrom e bolsa lateral.' },
-  { code:'noir', name:'Noir Urbano', tint:'#1f2630', opacity:.62, unlock:'starter', detail:'Versão escura para dias mais minimalistas.' },
-  { code:'crimson', name:'Carmesim', tint:'#7d2940', opacity:.62, unlock:'starter', detail:'Casaco em vermelho profundo, inspirado no seu look de alfaiataria.' },
-  { code:'moss', name:'Caminhante de Musgo', tint:'#56694c', opacity:.58, unlock:'level', level:5, detail:'Desbloqueia no nível 5.' }
+  { code:'noir', name:'Noir Urbano', tint:'#20242b', opacity:.64, unlock:'starter', detail:'Versão escura para dias mais minimalistas.' },
+  { code:'crimson', name:'Carmesim', tint:'#7d2940', opacity:.64, unlock:'starter', detail:'Casaco em vermelho profundo, inspirado no seu look de alfaiataria.' },
+  { code:'moss', name:'Caminhante de Musgo', tint:'#56694c', opacity:.60, unlock:'level', level:5, detail:'Desbloqueia no nível 5.' }
 ];
-
-async function resolveAvatarAsset() {
-  if (avatarResolvedSrc) return avatarResolvedSrc;
-  if (avatarResolvePromise) return avatarResolvePromise;
-  avatarResolvePromise = fetch(AVATAR_SVG_PATH, { cache:'no-store' })
-    .then(r => { if (!r.ok) throw new Error('avatar asset not found'); return r.text(); })
-    .then(svg => {
-      const match = svg.match(/href=["'](data:image\/(?:webp|png|jpeg);base64,[^"']+)["']/i);
-      avatarResolvedSrc = match?.[1] || AVATAR_SVG_PATH;
-      return avatarResolvedSrc;
-    })
-    .catch(() => {
-      avatarResolvedSrc = AVATAR_SVG_PATH;
-      return avatarResolvedSrc;
-    });
-  return avatarResolvePromise;
-}
 
 function currentLookCode() {
   return state.user?.user_metadata?.equipped_look || 'explorer';
@@ -34,19 +15,24 @@ function cosmeticUnlocked(item) {
   if (item.unlock === 'level') return computeLevel(totalXp()).level >= item.level;
   return false;
 }
-async function applyLookToSprite(wrap, code) {
+function applyLookToSprite(wrap, code) {
   if (!wrap) return;
   const item = COSMETIC_CATALOG.find(x=>x.code===code) || COSMETIC_CATALOG[0];
-  const src = await resolveAvatarAsset();
   wrap.dataset.look = item.code;
   wrap.style.setProperty('--look-color', item.tint);
   wrap.style.setProperty('--look-opacity', String(item.opacity));
   const img = wrap.querySelector('img');
   const tint = wrap.querySelector('.outfit-tint');
-  if (img) img.src = src;
+  if (img) {
+    img.src = AVATAR_ASSET_PATH;
+    img.onerror = () => {
+      img.removeAttribute('src');
+      wrap.classList.add('asset-fallback');
+    };
+  }
   if (tint) {
-    tint.style.webkitMaskImage = `url("${src}")`;
-    tint.style.maskImage = `url("${src}")`;
+    tint.style.webkitMaskImage = `url("${AVATAR_ASSET_PATH}")`;
+    tint.style.maskImage = `url("${AVATAR_ASSET_PATH}")`;
   }
 }
 function setAvatarSources() {
@@ -60,10 +46,10 @@ function cosmeticPreviewMarkup(item, current) {
   return `<article class="cosmetic-card ${equipped?'equipped':''} ${unlocked?'':'locked'}">
     <div class="cosmetic-preview">
       <div class="avatar-sprite wardrobe-preview" data-preview-look="${item.code}">
-        <img class="avatar-image" alt="Preview do look ${escapeHtml(item.name)}">
+        <img class="avatar-image" src="${AVATAR_ASSET_PATH}" alt="Preview do look ${escapeHtml(item.name)}">
         <span class="outfit-tint" aria-hidden="true"></span>
       </div>
-      <span class="cosmetic-rarity">${unlocked?'disponível':`nível ${item.level}`}</span>
+      <span class="cosmetic-rarity">${equipped?'equipado':unlocked?'disponível':`nível ${item.level}`}</span>
     </div>
     <div class="cosmetic-copy">
       <h4>${escapeHtml(item.name)}</h4>
