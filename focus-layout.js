@@ -213,3 +213,5 @@
 
 document.write('<link rel="stylesheet" href="life-balance.css?v=1">');
 document.write('<script src="life-balance.js?v=1"><\/script>');
+document.write('<link rel="stylesheet" href="mood-calendar.css?v=1">');
+document.write('<script src="mood-calendar.js?v=1"><\/script>');
