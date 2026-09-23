@@ -35,10 +35,10 @@ function projectByVoiceAlias(text){
   const n=normalizeVoiceText(text),projects=state.projects||[];
   const byName=needle=>projects.find(p=>normalizeVoiceText(p.name).includes(needle));
   if(/\b(monking play|mkg play)\b/.test(n))return byName('monking play');
-  if(/\b(monking|mkg)\b/.test(n))return byName('monking')&&!normalizeVoiceText(byName('monking')?.name||'').includes('play')?byName('monking'):projects.find(p=>normalizeVoiceText(p.name)==='monking');
+  if(/\b(monking|monkin|mkg)\b/.test(n))return projects.find(p=>normalizeVoiceText(p.name)==='monking')||byName('monking');
   if(/\b(manu|ana|lucia|freela)\b/.test(n))return projects.find(p=>normalizeVoiceText(p.name).includes('manu'))||null;
   if(/\b(duodecima|rpg da duodecima|rpg)\b/.test(n))return projects.find(p=>normalizeVoiceText(p.name).includes('duodecima'))||null;
-  if(/\b(pessoal|minha vida)\b/.test(n))return projects.find(p=>normalizeVoiceText(p.name)==='pessoal')||null;
+  if(/\b(pessoal|minha vida|trabalho pessoal)\b/.test(n))return projects.find(p=>normalizeVoiceText(p.name)==='pessoal')||null;
   return detectFromCatalog(text,projects);
 }
 function detectVoiceClient(text){
@@ -54,15 +54,16 @@ function earliestCut(text,patterns){
   return index;
 }
 function cleanVoiceTitle(raw){
-  let title=raw.trim().replace(/^[\s,.;-]*(ah|ahn|entao|então|tipo)[,.;\s-]*/i,'');
+  let title=raw.trim().replace(/^[\s,.;-]*(ah|ahn|entao|então|tipo|sei la|sei lá)[,.;\s-]*/i,'');
   title=title.replace(/^(eu\s+)?(preciso|precisava|quero|queria|gostaria|tenho que|tem que)\s+(de\s+)?/i,'');
   title=title.replace(/^(cria|criar|adicione|adiciona|adicionar|coloca|colocar|anota|anotar|faz|fazer)\s+(pra mim\s+|para mim\s+)?/i,'');
   title=title.replace(/^(uma\s+)?(nova\s+)?(tarefa|rotina)\s*(pro|pra|para o|para a|para|de|do|da)?\s*/i,'');
   title=title.replace(/^(pro|pra|para o|para a|para)\s+/i,'');
+  title=title.replace(/^(ajuste|ajustes)\s+(no|na|do|da|de)?\s*/i,'Ajustes ');
 
   const cut=earliestCut(title,[
     /[,;.]\s*(que\s+)?(e|é)\s+(uma\s+)?(tarefa|rotina)\b/i,
-    /\s+(que\s+)?(e|é)\s+(uma\s+)?(tarefa|rotina)\s+(micro|simples|media|média|complexa|epica|épica|dificil|difícil)\b/i,
+    /\s+(?:como\s+)?(que\s+)?(e|é)?\s*(uma\s+)?(tarefa|rotina)\s+(micro|simples|media|média|complexa|epica|épica|dificil|difícil)\b/i,
     /\s+(tarefa|rotina)\s+(micro|simples|media|média|complexa|epica|épica|dificil|difícil)\b/i,
     /\s+(com\s+)?prioridade\s+(urgente|alta|normal|baixa)\b/i,
     /\s+(pra|para)\s+(hoje|amanhã|amanha|depois de amanhã|depois de amanha|segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)\b/i,
@@ -78,6 +79,8 @@ function cleanVoiceTitle(raw){
     .replace(/\b(dificuldade\s+)?(micro|simples|media|média|complexa|epica|épica)\b/gi,'')
     .replace(/\b(hoje|amanhã|amanha|depois de amanhã|depois de amanha)\b/gi,'')
     .replace(/\b(no|na)\s+projeto\s+[^,.;]+/gi,'')
+    .replace(/\s+(pra|para)\s+Manu\b/gi,'')
+    .replace(/\s+(pra|para)\s+(o\s+)?meu trabalho pessoal\b/gi,'')
     .replace(/\b(e\s+)?(tudo mais|tudo o mais|e tal|por favor)\b/gi,'')
     .replace(/\s+,/g,',').replace(/^[,.;\s-]+|[,.;\s-]+$/g,'').replace(/\s{2,}/g,' ');
 
@@ -106,23 +109,59 @@ function parseVoiceTask(text){
   if(!area&&project?.area_id)area=state.areas.find(a=>a.id===project.area_id)||null;
   const client=detectVoiceClient(text);
   const kind=/\b(rotina|diaria|diario|todo dia|todos os dias)\b/.test(normalized)?'routine':'task';
+  let title=cleanVoiceTitle(text);
+  if(project){
+    const p=normalizeVoiceText(project.name);
+    if(p==='monking') title=title.replace(/\s+Monkin(?:g)?\b/gi,'').trim();
+    if(p.includes('monking play')) title=title.replace(/\s+(Monking Play|MKG Play)\b/gi,'').trim();
+    if(p==='pessoal') title=title.replace(/\s+(trabalho\s+)?pessoal\b/gi,'').trim();
+    if(p.includes('duodecima')) title=title.replace(/\s+(RPG\s+da\s+)?Duod[eé]cima\b/gi,'').trim();
+  }
   return {
-    title:cleanVoiceTitle(text),kind,difficulty,priority,
+    title:title||cleanVoiceTitle(text),kind,difficulty,priority,
     projectId:project?.id||'',areaId:area?.id||'',clientContext:client,
     scheduled,dueAt:explicitDue?`${scheduled}T23:59`:'',raw:text.trim()
   };
 }
+
+function splitVoiceTasks(text=''){
+  const marker=/(?:[,;.]?\s+)(?:(?:e\s+)?tamb[eé]m\s+(?:quero|queria|preciso|gostaria)|e\s+(?:quero|queria|preciso|gostaria)|al[eé]m\s+disso(?:,)?(?:\s+(?:quero|preciso|gostaria))?|outra\s+tarefa(?:,)?|depois\s+(?:quero|preciso|gostaria))\s+(?:adicionar|colocar|criar|anotar|incluir)?\s*/gi;
+  const chunks=text.split(marker).map(x=>x.trim().replace(/^[,.;\s-]+|[,.;\s-]+$/g,'')).filter(x=>x.length>=3);
+  if(chunks.length>1)return chunks.slice(0,8);
+  const semicolon=text.split(/\s*;\s*/).map(x=>x.trim()).filter(x=>x.length>=3);
+  return semicolon.length>1?semicolon.slice(0,8):[text.trim()];
+}
+function parseVoiceTasks(text=''){return splitVoiceTasks(text).map(parseVoiceTask);}
+
+function voiceTaskPills(parsed){
+  const project=state.projects.find(p=>p.id===parsed.projectId),area=state.areas.find(a=>a.id===parsed.areaId),diffLabel=difficultyLabels[parsed.difficulty]||'Média',priorityLabel=priorityLabels[parsed.priority]||'Normal';
+  return `<span class="voice-pill">${parsed.kind==='routine'?'rotina':'tarefa'}</span><span class="voice-pill">${diffLabel}</span><span class="voice-pill">prioridade ${priorityLabel.toLowerCase()}</span>${parsed.scheduled?`<span class="voice-pill">${formatDate(parsed.scheduled)}</span>`:''}${project?`<span class="voice-pill">${escapeHtml(project.name)}</span>`:''}${area?`<span class="voice-pill">${escapeHtml(area.name)}</span>`:''}${parsed.clientContext?`<span class="voice-pill">${escapeHtml(parsed.clientContext)}</span>`:''}`;
+}
 function renderVoiceDetected(){
   const text=$('#voiceTranscript')?.value.trim()||'',el=$('#voiceDetected'); if(!el)return;
-  if(!text){el.innerHTML='<span class="voice-detected-empty">Fale normalmente. Eu separo título, data, projeto, dificuldade e prioridade antes de criar a tarefa.</span>';return;}
-  const parsed=parseVoiceTask(text),project=state.projects.find(p=>p.id===parsed.projectId),area=state.areas.find(a=>a.id===parsed.areaId),diffLabel=difficultyLabels[parsed.difficulty]||'Média',priorityLabel=priorityLabels[parsed.priority]||'Normal';
-  el.innerHTML=`<div class="voice-title-suggestion"><span>Título sugerido</span><strong>${escapeHtml(parsed.title)}</strong></div><div class="voice-detected-pills"><span class="voice-pill">${parsed.kind==='routine'?'rotina':'tarefa'}</span><span class="voice-pill">${diffLabel}</span><span class="voice-pill">prioridade ${priorityLabel.toLowerCase()}</span>${parsed.scheduled?`<span class="voice-pill">${formatDate(parsed.scheduled)}</span>`:''}${project?`<span class="voice-pill">${escapeHtml(project.name)}</span>`:''}${area?`<span class="voice-pill">${escapeHtml(area.name)}</span>`:''}${parsed.clientContext?`<span class="voice-pill">${escapeHtml(parsed.clientContext)}</span>`:''}</div>`;
+  const taskButton=$('#voiceTaskButton'),inboxButton=$('#voiceInboxButton');
+  if(!text){
+    el.classList.remove('voice-detected-batch');
+    el.innerHTML='<span class="voice-detected-empty">Fale normalmente. Eu separo título, data, projeto, dificuldade e prioridade antes de criar a tarefa.</span>';
+    if(taskButton)taskButton.textContent='revisar como tarefa'; if(inboxButton)inboxButton.textContent='salvar na Inbox'; return;
+  }
+  const parsedList=parseVoiceTasks(text);
+  if(parsedList.length===1){
+    const parsed=parsedList[0]; el.classList.remove('voice-detected-batch');
+    el.innerHTML=`<div class="voice-title-suggestion"><span>Título sugerido</span><strong>${escapeHtml(parsed.title)}</strong></div><div class="voice-detected-pills">${voiceTaskPills(parsed)}</div>`;
+    if(taskButton)taskButton.textContent='revisar como tarefa'; if(inboxButton)inboxButton.textContent='salvar na Inbox'; return;
+  }
+  el.classList.add('voice-detected-batch');
+  el.innerHTML=`<div class="voice-batch-head"><strong>${parsedList.length} tarefas detectadas</strong><span>Confira antes de criar tudo de uma vez.</span></div>${parsedList.map((parsed,i)=>`<div class="voice-batch-card"><div class="voice-batch-card-head"><span class="voice-batch-number">${i+1}</span><span class="voice-batch-title">${escapeHtml(parsed.title)}</span></div><div class="voice-detected-pills">${voiceTaskPills(parsed)}</div></div>`).join('')}`;
+  if(taskButton)taskButton.textContent=`criar ${parsedList.length} tarefas`;
+  if(inboxButton)inboxButton.textContent=`salvar ${parsedList.length} na Inbox`;
 }
 function setVoiceStatus(text,listening=false){const status=$('#voiceStatus'),modal=$('#voiceModal'),label=$('#voiceMicLabel');if(status)status.textContent=text;if(modal)modal.classList.toggle('is-listening',listening);if(label)label.textContent=listening?'parar gravação':'começar a falar';}
 function ensureVoiceModal(){
   const button=$('#voiceCaptureButton'); if(button){button.textContent='🎙️ adicionar por áudio';button.classList.add('voice-entry');}
+  if(!document.getElementById('audioBatchStyles')){const link=document.createElement('link');link.id='audioBatchStyles';link.rel='stylesheet';link.href='audio-batch.css?v=1';document.head.appendChild(link);}
   if($('#voiceModal'))return;
-  const wrapper=document.createElement('div');wrapper.className='modal-backdrop';wrapper.id='voiceModal';wrapper.hidden=true;wrapper.innerHTML=`<section class="modal rpg-panel voice-modal" role="dialog" aria-modal="true"><div class="modal-head"><div><p class="eyebrow">CAPTURA POR ÁUDIO</p><h3>Fala. Eu organizo.</h3></div><button type="button" class="icon-button" data-close-modal="voiceModal">×</button></div><p class="muted voice-help">Pode falar naturalmente: “Preciso de uma tarefa pro calendário da Ana, complexa, pra amanhã” ou “Media kit da Ana, simples, hoje”.</p><div class="voice-capture-stage"><button type="button" class="voice-mic" id="voiceMicButton"><span class="voice-mic-icon">🎙️</span><span id="voiceMicLabel">começar a falar</span></button><div class="voice-status" id="voiceStatus">microfone parado</div><div class="voice-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div><label class="voice-transcript-label"><span>Transcrição</span><textarea id="voiceTranscript" rows="5" placeholder="Sua fala aparece aqui. Você pode editar antes de transformar em tarefa."></textarea></label><div class="voice-detected" id="voiceDetected"></div><div class="modal-actions voice-actions"><button type="button" class="btn secondary" id="voiceClearButton">limpar</button><button type="button" class="btn secondary" id="voiceInboxButton">salvar na Inbox</button><button type="button" class="btn primary" id="voiceTaskButton">revisar como tarefa</button></div><p class="voice-privacy">O Edd's Life não guarda o áudio. A transcrição é interpretada localmente no navegador e só vira tarefa quando você confirma.</p></section>`;
+  const wrapper=document.createElement('div');wrapper.className='modal-backdrop';wrapper.id='voiceModal';wrapper.hidden=true;wrapper.innerHTML=`<section class="modal rpg-panel voice-modal" role="dialog" aria-modal="true"><div class="modal-head"><div><p class="eyebrow">CAPTURA POR ÁUDIO</p><h3>Fala. Eu organizo.</h3></div><button type="button" class="icon-button" data-close-modal="voiceModal">×</button></div><p class="muted voice-help">Pode falar uma ou várias: “Media kit da Ana, simples, amanhã; também quero calendário de outubro Monking, épica; e quero pesquisa X pessoal, média, hoje”.</p><div class="voice-capture-stage"><button type="button" class="voice-mic" id="voiceMicButton"><span class="voice-mic-icon">🎙️</span><span id="voiceMicLabel">começar a falar</span></button><div class="voice-status" id="voiceStatus">microfone parado</div><div class="voice-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div><label class="voice-transcript-label"><span>Transcrição</span><textarea id="voiceTranscript" rows="5" placeholder="Sua fala aparece aqui. Você pode editar antes de transformar em tarefa."></textarea></label><div class="voice-detected" id="voiceDetected"></div><div class="modal-actions voice-actions"><button type="button" class="btn secondary" id="voiceClearButton">limpar</button><button type="button" class="btn secondary" id="voiceInboxButton">salvar na Inbox</button><button type="button" class="btn primary" id="voiceTaskButton">revisar como tarefa</button></div><p class="voice-privacy">O Edd's Life não guarda o áudio. A transcrição é interpretada localmente no navegador e só vira tarefa quando você confirma.</p></section>`;
   document.body.appendChild(wrapper);wrapper.addEventListener('click',e=>{if(e.target===wrapper)wrapper.hidden=true;});
 }
 function openVoiceCapture(){ensureVoiceModal();const modal=$('#voiceModal');modal.hidden=false;voiceFinalTranscript='';voiceInterimTranscript='';$('#voiceTranscript').value='';setVoiceStatus(SpeechRecognitionAPI?'microfone pronto':'ditado por voz não disponível neste navegador');renderVoiceDetected();}
@@ -150,8 +189,38 @@ function fillTaskFromVoice(parsed,inbox=false){
   $('#taskContext').value=parsed.clientContext||'';
   $('#taskDescription').value='';
 }
-function voiceToTask(){const text=$('#voiceTranscript')?.value.trim()||'';if(!text)return showToast('Fale ou digite uma tarefa primeiro.','error');stopVoiceCapture();const parsed=parseVoiceTask(text);closeModal('voiceModal');fillTaskFromVoice(parsed,false);}
-async function voiceToInbox(){const text=$('#voiceTranscript')?.value.trim()||'';if(!text)return showToast('Fale ou digite uma tarefa primeiro.','error');stopVoiceCapture();const parsed=parseVoiceTask(text);closeModal('voiceModal');fillTaskFromVoice(parsed,true);await saveTask('inbox');}
+function voicePayload(parsed,inbox=false){
+  const reward=rewardByDifficulty[parsed.difficulty]||rewardByDifficulty.medium;
+  const scheduled=inbox?null:(parsed.scheduled||null);
+  return {
+    user_id:state.user.id,title:parsed.title,kind:parsed.kind,difficulty:parsed.difficulty,priority:parsed.priority,
+    project_id:parsed.projectId||null,area_id:parsed.areaId||null,scheduled_for:scheduled,
+    due_at:(!inbox&&parsed.dueAt)?new Date(parsed.dueAt).toISOString():null,client_context:parsed.clientContext||null,
+    description:null,source:'voice',status:inbox?'inbox':(scheduled?'planned':'inbox'),
+    recurrence_rule:parsed.kind==='routine'?'FREQ=DAILY':null,xp_base:reward.xp,coin_base:reward.coins,focus_base:reward.focus
+  };
+}
+async function createVoiceBatch(parsedList,inbox=false){
+  if(!parsedList.length)return;
+  const payloads=parsedList.map(p=>voicePayload(p,inbox));
+  const {error}=await db.from('tasks').insert(payloads);
+  if(error)return showToast(`Não consegui criar as tarefas: ${error.message}`,'error');
+  closeModal('voiceModal');
+  await refreshCore(); renderAll();
+  showToast(`${parsedList.length} tarefas ${inbox?'salvas na Inbox':'criadas'}.`,'success');
+}
+async function voiceToTask(){
+  const text=$('#voiceTranscript')?.value.trim()||'';if(!text)return showToast('Fale ou digite uma tarefa primeiro.','error');
+  stopVoiceCapture();const parsedList=parseVoiceTasks(text);
+  if(parsedList.length===1){closeModal('voiceModal');fillTaskFromVoice(parsedList[0],false);return;}
+  await createVoiceBatch(parsedList,false);
+}
+async function voiceToInbox(){
+  const text=$('#voiceTranscript')?.value.trim()||'';if(!text)return showToast('Fale ou digite uma tarefa primeiro.','error');
+  stopVoiceCapture();const parsedList=parseVoiceTasks(text);
+  if(parsedList.length===1){closeModal('voiceModal');fillTaskFromVoice(parsedList[0],true);await saveTask('inbox');return;}
+  await createVoiceBatch(parsedList,true);
+}
 function clearVoiceCapture(){stopVoiceCapture();voiceFinalTranscript='';voiceInterimTranscript='';$('#voiceTranscript').value='';setVoiceStatus(SpeechRecognitionAPI?'microfone pronto':'ditado por voz não disponível neste navegador');renderVoiceDetected();}
 function bindVoiceCapture(){ensureVoiceModal();$('#voiceMicButton')?.addEventListener('click',startVoiceCapture);$('#voiceTaskButton')?.addEventListener('click',voiceToTask);$('#voiceInboxButton')?.addEventListener('click',voiceToInbox);$('#voiceClearButton')?.addEventListener('click',clearVoiceCapture);$('#voiceTranscript')?.addEventListener('input',renderVoiceDetected);}
 bindVoiceCapture();window.openVoiceCapture=openVoiceCapture;window.stopVoiceCapture=stopVoiceCapture;
