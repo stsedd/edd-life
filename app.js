@@ -5,7 +5,7 @@ $('#signOutButton').addEventListener('click',async()=>{await db.auth.signOut();a
 $('#quickAdd').addEventListener('click',()=>openTaskModal());
 $('#plannerAdd').addEventListener('click',()=>openTaskModal());
 $('#inboxAdd').addEventListener('click',()=>openTaskModal(null,true));
-$('#voiceCaptureButton').addEventListener('click',async()=>{try{if(typeof window.openVoiceCapture!=='function'){if(!window.__eddVoiceScript){window.__eddVoiceScript=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='audio.js?v=2';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}await window.__eddVoiceScript;}window.openVoiceCapture();}catch(error){console.error(error);showToast('Não consegui carregar a captura por áudio.','error');}});
+$('#voiceCaptureButton').addEventListener('click',async()=>{try{if(typeof window.openVoiceCapture!=='function'){if(!window.__eddVoiceScript){window.__eddVoiceScript=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='audio.js?v=3';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}await window.__eddVoiceScript;}window.openVoiceCapture();}catch(error){console.error(error);showToast('Não consegui carregar a captura por áudio.','error');}});
 $('#newRewardButton').addEventListener('click',()=>$('#rewardModal').hidden=false);
 $('#taskForm').addEventListener('submit',e=>{e.preventDefault();saveTask();});
 $('#sendToInbox').addEventListener('click',()=>saveTask('inbox'));
